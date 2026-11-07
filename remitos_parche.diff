@@ -1,0 +1,209 @@
+--- stock_app/remitos/index_original.html	2026-11-06 01:39:22.523149249 +0000
++++ stock_app/remitos/index.html	2026-11-06 01:39:22.574137839 +0000
+@@ -403,6 +403,7 @@
+         <button type="button" data-tipo="EPP">EPP</button>
+         <button type="button" data-tipo="Extintor">Extintor</button>
+         <button type="button" data-tipo="Material">Material</button>
++        <button type="button" data-tipo="Stock">Stock (cables y materiales)</button>
+         <button type="button" data-tipo="HerramientaManual">Herram. manuales</button>
+         <button type="button" data-tipo="Izaje">Izaje</button>
+         <button type="button" data-tipo="Otros">Otros (texto libre)</button>
+@@ -531,8 +532,17 @@
+   // ==== CONFIGURACIÓN — completar con la URL de tu Web App desplegada ====
+   const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwIfxEqwRuL7A_G6SpuqPmsX8NTK7n09kDWEL45n7r0Uy40gTKACsg2QeZlWgv7H75Gmw/exec";
+ 
++  // URL de la Web App del backend de STOCK (Apps Script del Sheet de stock)
++  const STOCK_URL = "PEGAR_URL_APP_STOCK";
++
+   const state = {
+     tipo: "Herramienta",
++    stkDisponibles: [],
++    stkSel: {},
++    stkBuscar: "",
++    stkCategoria: "",
++    stkDetalle: "",
++    cargandoStk: false,
+     nodos: [],
+     personal: [],
+     herramientasDisponibles: [],
+@@ -577,7 +587,8 @@
+   function renderItems(){
+     const cont = $("listaItems");
+     cont.innerHTML = "";
+-    $("btnAgregarItem").style.display = (state.tipo === "Izaje" || state.tipo === "HerramientaManual") ? "none" : "";
++    $("btnAgregarItem").style.display = (state.tipo === "Izaje" || state.tipo === "HerramientaManual" || state.tipo === "Stock") ? "none" : "";
++    if (state.tipo === "Stock") { renderStock_(cont); return; }
+     if (state.tipo === "Izaje") { renderIzaje_(cont); return; }
+     if (state.tipo === "HerramientaManual") { renderMan_(cont); return; }
+     state.items.forEach((item, idx) => {
+@@ -1022,6 +1033,7 @@
+     state.items = [nuevoItemVacio()];
+     state.izajeSel = {}; state.izajeBuscar = ""; state.izajeTipoFiltro = "";
+     state.manSel = {}; state.manBuscar = ""; state.manCategoria = "";
++    state.stkSel = {}; state.stkBuscar = ""; state.stkCategoria = "";
+     cargarCatalogoItemsPorOrigen();
+   });
+ 
+@@ -1277,6 +1289,102 @@
+     }
+   }
+ 
++  // ===== STOCK (cables y materiales de almacén): selección múltiple con saldo del origen =====
++  function stkFiltrados_(){
++    const tokens = normalizarBusqueda_(state.stkBuscar).split(/\s+/).filter(Boolean);
++    return state.stkDisponibles.filter(i => {
++      if (state.stkCategoria && i.categoria !== state.stkCategoria) return false;
++      const txt = normalizarBusqueda_([i.codigo, i.descripcion, i.categoria, i.subtipo].join(" "));
++      return tokens.every(t => txt.indexOf(t) >= 0);
++    }).sort((a, b) => String(a.descripcion).localeCompare(String(b.descripcion), "es", { numeric: true }));
++  }
++  function stkTotal_(){ return Object.keys(state.stkSel).filter(k => state.stkSel[k] > 0).length; }
++  function stkFilasHtml_(){
++    const lista = stkFiltrados_();
++    if (!lista.length) return `<div class="mat-vacio">Ningún ítem coincide.</div>`;
++    const fmtN = (n) => Number(n).toLocaleString("es-AR", { maximumFractionDigits: 3 });
++    return lista.map(i => {
++      const detalle = [i.categoria, i.subtipo, i.codigo].filter(Boolean).join(" · ");
++      const v = state.stkSel[i.codigo];
++      return `<div class="izj-fila">
++        <span class="izj-txt"><b>${escHtml(i.descripcion)}</b><small>${escHtml(detalle)}</small></span>
++        <span class="chip tipo">${fmtN(i.saldo)} ${escHtml(i.unidad)} disp.</span>
++        <input type="number" min="0" max="${i.saldo}" step="any" value="${v ? v : ""}" placeholder="0" data-stk="${escHtml(i.codigo)}" style="width:92px;flex:none" title="Cantidad a enviar en ${escHtml(i.unidad)}">
++        <span style="font-size:12px;color:var(--texto-tenue);width:26px">${escHtml(i.unidad)}</span>
++      </div>`;
++    }).join("");
++  }
++  function renderStock_(cont){
++    const box = document.createElement("div");
++    box.className = "izj-box";
++    if (!$("obraOrigen").value) {
++      box.innerHTML = `<div class="mat-vacio">Elegí primero el origen para ver el stock disponible ahí.</div>`;
++    } else if (state.cargandoStk) {
++      box.innerHTML = `<div class="mat-vacio">Buscando stock…</div>`;
++    } else if (!state.stkDisponibles.length) {
++      box.innerHTML = `<div class="mat-vacio">${escHtml(state.stkDetalle || "No hay stock cargado en ese origen.")}</div>`;
++    } else {
++      const cats = Array.from(new Set(state.stkDisponibles.map(i => i.categoria).filter(Boolean))).sort();
++      box.innerHTML = `
++        <div class="izj-aviso">Escribí la cantidad a enviar de cada ítem (máximo: lo que hay en el origen). Los cables van en metros.</div>
++        <div class="izj-barra">
++          <input type="search" id="stkBuscar" placeholder="Buscar (ej: 4x16, comando, CAB-012…)" value="${escHtml(state.stkBuscar)}">
++          <select id="stkCat"><option value="">Todas las categorías</option>${cats.map(t => `<option value="${escHtml(t)}" ${t === state.stkCategoria ? "selected" : ""}>${escHtml(t)}</option>`).join("")}</select>
++        </div>
++        <div class="izj-acciones"><button type="button" id="stkLimpiar">Limpiar</button><span id="stkCuenta">${stkTotal_()} ítem(s) a enviar</span></div>
++        <div class="izj-lista" id="stkLista">${stkFilasHtml_()}</div>`;
++    }
++    cont.appendChild(box);
++    if (!box.querySelector("#stkLista")) return;
++    const refrescar = () => { $("stkLista").innerHTML = stkFilasHtml_(); $("stkCuenta").textContent = stkTotal_() + " ítem(s) a enviar"; };
++    $("stkBuscar").addEventListener("input", e => { state.stkBuscar = e.target.value; refrescar(); });
++    $("stkCat").addEventListener("change", e => { state.stkCategoria = e.target.value; refrescar(); });
++    $("stkLimpiar").addEventListener("click", () => { state.stkSel = {}; refrescar(); });
++    $("stkLista").addEventListener("input", e => {
++      const cod = e.target.dataset && e.target.dataset.stk;
++      if (cod == null) return;
++      const it = state.stkDisponibles.find(x => x.codigo === cod); if (!it) return;
++      let q = parseFloat(String(e.target.value).replace(",", "."));
++      if (isNaN(q) || q <= 0) { delete state.stkSel[cod]; }
++      else {
++        if (q > it.saldo) { q = it.saldo; e.target.value = q; }
++        state.stkSel[cod] = q;
++      }
++      $("stkCuenta").textContent = stkTotal_() + " ítem(s) a enviar";
++    });
++  }
++  function itemsStock_(){
++    // Se envía como tipo "Material" (lo procesa el servidor de remitos tal cual) y se marca extra.stock
++    // para que el backend de Stock lo registre como movimiento.
++    return state.stkDisponibles.filter(i => state.stkSel[i.codigo] > 0)
++      .map(i => ({
++        tipo_recurso: "Material", codigo: i.codigo, descripcion: i.descripcion,
++        cantidad: state.stkSel[i.codigo], unidad: i.unidad, extra: { stock: true }
++      }));
++  }
++  async function cargarStock_(){
++    const origen = $("obraOrigen").value;
++    if (state.tipo !== "Stock") return;
++    state.stkDisponibles = []; state.stkDetalle = "";
++    if (!origen) { renderItems(); return; }
++    if (STOCK_URL.indexOf("PEGAR_") >= 0) { mostrarError("Falta configurar STOCK_URL en el archivo de la página."); return; }
++    state.cargandoStk = true; renderItems();
++    try {
++      const res = await fetch(`${STOCK_URL}?accion=stock_por_nodo&nodo=${encodeURIComponent(origen)}`);
++      const data = await res.json();
++      if ($("obraOrigen").value !== origen) return;
++      if (data.error) throw new Error(data.detalle || data.error);
++      state.stkDisponibles = data.items || [];
++      state.stkDetalle = data.detalle || "";
++      const cods = new Set(state.stkDisponibles.map(i => i.codigo));
++      Object.keys(state.stkSel).forEach(c => { if (!cods.has(c)) delete state.stkSel[c]; });
++    } catch (err) {
++      mostrarError("No se pudo cargar el stock de ese origen (" + err.message + ").");
++    } finally {
++      state.cargandoStk = false; renderItems();
++    }
++  }
++
+   // ===== ELEMENTOS DE IZAJE: selección múltiple de los que hay en el origen =====
+   function izajeVisibles_(){
+     const tokens = normalizarBusqueda_(state.izajeBuscar).split(/\s+/).filter(Boolean);
+@@ -1387,6 +1495,7 @@
+     else if (state.tipo === "Material") cargarComprasPendientes();
+     else if (state.tipo === "Izaje") cargarIzaje();
+     else if (state.tipo === "HerramientaManual") cargarManuales();
++    else if (state.tipo === "Stock") cargarStock_();
+     else renderItems();
+   }
+ 
+@@ -1427,17 +1536,21 @@
+       mostrarError("Indicá la cantidad de al menos una herramienta manual para enviar.");
+       return;
+     }
++    if (state.tipo === "Stock" && itemsStock_().length === 0) {
++      mostrarError("Escribí la cantidad de al menos un ítem de stock para enviar.");
++      return;
++    }
+     if (state.tipo === "Izaje" && itemsIzaje_().length === 0) {
+       mostrarError("Marcá al menos un elemento de izaje para enviar.");
+       return;
+     }
+-    const itemsInvalidos = state.tipo !== "Izaje" && state.tipo !== "HerramientaManual" && state.items.some(i => {
++    const itemsInvalidos = state.tipo !== "Izaje" && state.tipo !== "HerramientaManual" && state.tipo !== "Stock" && state.items.some(i => {
+       if (state.tipo === "Herramienta" && i.modo === "lista") return !i.herramientaId || !i.cantidad;
+       if (state.tipo === "Extintor" && i.modo === "lista") return !i.extintorId || !i.cantidad;
+       if (state.tipo === "Material" && i.modo === "lista") return !i.materialClave || !i.cantidad;
+       return !i.descripcion || !i.cantidad;
+     });
+-    if (state.tipo !== "Izaje" && state.tipo !== "HerramientaManual" && (state.items.length === 0 || itemsInvalidos)) {
++    if (state.tipo !== "Izaje" && state.tipo !== "HerramientaManual" && state.tipo !== "Stock" && (state.items.length === 0 || itemsInvalidos)) {
+       mostrarError("Completá todos los ítems: elegí de la lista (o cargá manual) y la cantidad.");
+       return;
+     }
+@@ -1458,7 +1571,7 @@
+       domicilio: cardClienteVisible ? $("domicilio").value.trim() : "",
+       localidad: cardClienteVisible ? $("localidad").value.trim() : "",
+       cuit: cardClienteVisible ? $("cuit").value.trim() : "",
+-      items: state.tipo === "Izaje" ? itemsIzaje_() : (state.tipo === "HerramientaManual" ? itemsMan_() : state.items.map(i => {
++      items: state.tipo === "Stock" ? itemsStock_() : state.tipo === "Izaje" ? itemsIzaje_() : (state.tipo === "HerramientaManual" ? itemsMan_() : state.items.map(i => {
+         const extra = Object.assign({}, i.extra);
+         if (i.herramientaId) extra.herramienta_id = i.herramientaId;
+         if (i.extintorId) extra.extintor_id = i.extintorId;
+@@ -1497,6 +1610,7 @@
+       }
+ 
+       $("remitoIdTexto").textContent = data.remito_id;
++      if (state.tipo === "Stock" && STOCK_URL.indexOf("PEGAR_") < 0) { fetch(`${STOCK_URL}?accion=sincronizar`).catch(() => {}); }
+       $("linkVerPdf").href = data.pdf_url;
+       const av = $("avisoMail");
+       if (data.mail_enviado === true) { av.textContent = "✔ Se avisó por mail a quien recibe."; av.style.color = "var(--exito)"; }
+@@ -1520,8 +1634,9 @@
+     state.materialesDisponibles = [];
+     state.izajeDisponibles = []; state.izajeSel = {}; state.izajeBuscar = ""; state.izajeTipoFiltro = "";
+     state.manDisponibles = []; state.manSel = {}; state.manBuscar = ""; state.manCategoria = "";
++    state.stkDisponibles = []; state.stkSel = {}; state.stkBuscar = ""; state.stkCategoria = "";
+     state.items = [nuevoItemVacio()];
+-    if (state.tipo === "Izaje") cargarIzaje(); else if (state.tipo === "HerramientaManual") cargarManuales(); else renderItems();
++    if (state.tipo === "Izaje") cargarIzaje(); else if (state.tipo === "HerramientaManual") cargarManuales(); else if (state.tipo === "Stock") cargarStock_(); else renderItems();
+     window.scrollTo({ top: 0, behavior: "smooth" });
+   });
+ 

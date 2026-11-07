@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>ISL · Remitos Digitales</title>
+<style>
+  :root{
+    --gris-isl:#4a4e54;
+    --gris-isl-oscuro:#2b2d31;
+    --rojo-isl:#c81f3f;
+    --rojo-isl-oscuro:#9e1832;
+    --fondo:#f2f1ee;
+    --superficie:#ffffff;
+    --borde:#dcdad4;
+    --texto:#2b2d31;
+    --texto-tenue:#75797f;
+    --exito:#2e7d32;
+    --exito-fondo:#eaf4ea;
+    --error:#b3261e;
+    --error-fondo:#fbeceb;
+    --radio:10px;
+    --sombra:0 1px 2px rgba(43,45,49,0.06), 0 1px 8px rgba(43,45,49,0.05);
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    background:var(--fondo);
+    color:var(--texto);
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:60px;
+  }
+
+  header{
+    background:var(--gris-isl-oscuro);
+    padding:20px 20px 24px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  header img{ height:30px; }
+  header h1{
+    color:#fff;
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    margin:0;
+  }
+  header .sub{
+    color:#b8bcc2;
+    font-size:11px;
+    letter-spacing:0.04em;
+    margin-top:2px;
+  }
+
+  main{
+    max-width:520px;
+    margin:-14px auto 0;
+    padding:0 14px;
+  }
+
+  .card{
+    background:var(--superficie);
+    border-radius:var(--radio);
+    box-shadow:var(--sombra);
+    padding:18px 16px;
+    margin-bottom:14px;
+  }
+
+  .eyebrow{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.09em;
+    text-transform:uppercase;
+    color:var(--rojo-isl);
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .eyebrow .num{
+    background:var(--gris-isl-oscuro);
+    color:#fff;
+    border-radius:4px;
+    padding:2px 6px;
+    font-size:10px;
+  }
+
+  label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--gris-isl-oscuro);
+    margin:0 0 6px;
+  }
+  label .req{ color:var(--rojo-isl); }
+
+  select, input[type=text], input[type=number], input[type=password], input[type=search], textarea{
+    width:100%;
+    padding:11px 12px;
+    border:1px solid var(--borde);
+    border-radius:8px;
+    font-size:15px;
+    color:var(--texto);
+    background:#fff;
+    font-family:inherit;
+  }
+  select:focus, input:focus, textarea:focus{
+    outline:2px solid var(--rojo-isl);
+    outline-offset:1px;
+    border-color:var(--rojo-isl);
+  }
+
+  .field{ margin-bottom:14px; }
+  .field:last-child{ margin-bottom:0; }
+
+  .grid2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+
+  .segmented{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .segmented button{
+    padding:14px 8px;
+    border-radius:8px;
+    border:1.5px solid var(--borde);
+    background:#fff;
+    font-size:13.5px;
+    font-weight:700;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    color:var(--texto-tenue);
+    cursor:pointer;
+  }
+  #segmentedTipo{ grid-template-columns:repeat(3,1fr); }
+  .izj-box{ border:1px solid var(--borde,#ddd); border-radius:10px; padding:10px; background:#fff; }
+  .izj-aviso{ font-size:12px; color:var(--texto-tenue); margin-bottom:8px; }
+  .izj-barra{ display:grid; grid-template-columns:2fr 1fr; gap:8px; margin-bottom:8px; }
+  .izj-acciones{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px; font-size:12px; }
+  .izj-acciones button{ background:none; border:1px solid var(--borde,#ccc); border-radius:6px; padding:5px 10px; font-size:12px; font-weight:600; cursor:pointer; }
+  .izj-acciones span{ margin-left:auto; font-weight:700; }
+  .man-grupo{ border-bottom:1px solid #eee; }
+  .man-btn{ flex:none; background:none; border:1px solid var(--borde,#ccc); border-radius:6px; padding:6px 8px; font-size:12px; font-weight:600; cursor:pointer; }
+  .man-tags{ display:flex; flex-wrap:wrap; gap:6px; padding:2px 4px 10px; }
+  .man-tag{ display:inline-flex; align-items:center; gap:5px; border:1px solid var(--borde,#ccc); border-radius:6px; padding:5px 8px; font-size:12px; cursor:pointer; background:#fff; }
+  .man-tag.sel{ background:#fde8ec; border-color:#c8102e; }
+  .man-tag input{ width:auto; margin:0; }
+  .izj-lista{ max-height:340px; overflow:auto; }
+  .izj-fila{ display:flex; gap:8px; align-items:center; padding:8px 4px; border-bottom:1px solid #eee; cursor:pointer; }
+  .izj-fila input{ width:auto; flex:none; }
+  .izj-fila.izj-bloq{ opacity:.55; cursor:not-allowed; }
+  .izj-txt{ flex:1; min-width:0; font-size:13px; }
+  .izj-txt small{ display:block; color:var(--texto-tenue); font-size:11.5px; }
+  .izj-fila .chip{ flex:none; }
+  @media (max-width:560px){ .izj-barra{ grid-template-columns:1fr; } .izj-fila{ flex-wrap:wrap; } }
+  #segmentedTipo button{ min-width:0; padding:14px 4px; font-size:12.5px; }
+  @media (max-width:560px){
+    #segmentedTipo{ grid-template-columns:1fr 1fr; }
+    #segmentedTipo button{ font-size:13.5px; }
+    #segmentedTipo button:last-child:nth-child(odd){ grid-column:1 / -1; }
+  }
+
+  /* Pestañas: Nuevo remito / Remitos generados */
+  .tabs{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+  .tabs button{
+    padding:12px 8px; border-radius:8px; border:1.5px solid var(--borde);
+    background:#fff; font-size:13px; font-weight:700; color:var(--texto-tenue); cursor:pointer;
+  }
+  .tabs button.activo{ border-color:var(--gris-isl); background:var(--gris-isl); color:#fff; }
+
+  /* Selector de materiales con buscador */
+  .mat-buscar{ width:100%; margin-bottom:8px; }
+  .mat-lista{ max-height:300px; overflow-y:auto; border:1px solid var(--borde); border-radius:8px; background:#fff; }
+  .mat-grupo{ border-bottom:1px solid var(--borde); }
+  .mat-grupo:last-child{ border-bottom:none; }
+  .mat-cab{ background:#f6f5f2; padding:7px 10px; font-size:12px; color:var(--texto); position:sticky; top:0; }
+  .mat-cc{ display:block; font-size:11px; color:var(--texto-tenue); margin-top:1px; }
+  .mat-op{
+    display:block; width:100%; text-align:left; padding:9px 10px; border:none; background:#fff;
+    font-size:12.5px; color:var(--texto); cursor:pointer; border-top:1px solid #f0efeb;
+  }
+  .mat-op:hover, .mat-op:active{ background:#fbeceb; }
+  .mat-n{ font-weight:700; color:var(--rojo-isl); margin-right:4px; }
+  .mat-pend{ display:block; font-size:11.5px; color:var(--texto-tenue); margin-top:2px; }
+  .mat-vacio{ padding:12px; font-size:12.5px; color:var(--texto-tenue); }
+  .mat-nota{ font-size:11.5px; color:var(--texto-tenue); margin-top:6px; }
+  .mat-sel{
+    display:flex; gap:10px; align-items:flex-start; justify-content:space-between;
+    border:1.5px solid var(--rojo-isl); border-radius:8px; padding:9px 10px; font-size:12.5px; background:#fff;
+  }
+  .mat-cambiar{ background:none; border:none; color:var(--rojo-isl); font-weight:700; font-size:12px; cursor:pointer; padding:0; white-space:nowrap; }
+
+  /* Listado de remitos */
+  .lst-barra{ display:grid; grid-template-columns:1fr; gap:8px; margin-bottom:10px; }
+  .lst-barra input, .lst-barra select{ width:100%; }
+  .lst-resumen{ font-size:12px; color:var(--texto-tenue); margin:4px 0 10px; }
+  .rem-card{ border:1px solid var(--borde); border-radius:8px; padding:11px 12px; margin-bottom:10px; background:#fff; }
+  .rem-top{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .rem-top b{ font-size:14px; margin-right:auto; }
+  .chip{ font-size:11px; font-weight:700; padding:3px 8px; border-radius:20px; letter-spacing:0.02em; }
+  .chip.tipo{ background:#ececea; color:var(--texto); }
+  .chip.ok{ background:var(--exito-fondo); color:var(--exito); }
+  .chip.warn{ background:#fff4d6; color:#8a5a00; }
+  .chip.err{ background:var(--error-fondo); color:var(--error); }
+  .rem-fecha{ font-size:11.5px; color:var(--texto-tenue); margin-top:3px; }
+  .rem-ruta{ font-size:13px; font-weight:600; margin-top:6px; }
+  .rem-pers{ font-size:12.5px; margin-top:3px; }
+  .rem-res{ font-size:12px; color:var(--texto-tenue); margin-top:4px; }
+  .rem-pdf{ display:inline-block; margin-top:7px; font-size:12.5px; font-weight:700; color:var(--rojo-isl); text-decoration:none; }
+  .msg-error{ background:var(--error-fondo); color:var(--error); padding:10px 12px; border-radius:8px; font-size:13px; margin-top:10px; }
+  .segmented button.activo{
+    border-color:var(--rojo-isl);
+    background:var(--rojo-isl);
+    color:#fff;
+  }
+
+  .item-row{
+    border:1px solid var(--borde);
+    border-radius:8px;
+    padding:12px;
+    margin-bottom:10px;
+    position:relative;
+  }
+  .item-row .item-num{
+    position:absolute;
+    top:-9px;
+    left:10px;
+    background:var(--gris-isl-oscuro);
+    color:#fff;
+    font-size:10px;
+    font-weight:700;
+    padding:2px 7px;
+    border-radius:20px;
+  }
+  .item-row .quitar{
+    position:absolute;
+    top:8px;
+    right:8px;
+    background:none;
+    border:none;
+    color:var(--texto-tenue);
+    font-size:18px;
+    line-height:1;
+    cursor:pointer;
+    padding:2px 6px;
+  }
+  .item-grid{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:8px;
+    margin-top:8px;
+  }
+  .item-grid3{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-top:8px;
+  }
+
+  .btn-agregar{
+    width:100%;
+    padding:12px;
+    border:1.5px dashed var(--borde);
+    border-radius:8px;
+    background:#fafaf9;
+    color:var(--gris-isl);
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:0.03em;
+    cursor:pointer;
+    text-transform:uppercase;
+  }
+
+  .btn-submit{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:8px;
+    background:var(--rojo-isl);
+    color:#fff;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    box-shadow:0 2px 10px rgba(200,31,63,0.3);
+  }
+  .btn-submit:active{ background:var(--rojo-isl-oscuro); }
+  .btn-submit:disabled{ background:#c9c9c9; box-shadow:none; cursor:default; }
+
+  .banner{
+    padding:12px 14px;
+    border-radius:8px;
+    font-size:13.5px;
+    margin-bottom:14px;
+    display:none;
+  }
+  .banner.error{ background:var(--error-fondo); color:var(--error); display:block; }
+
+  /* Pantalla de éxito */
+  .overlay{
+    position:fixed; inset:0;
+    background:rgba(43,45,49,0.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:50;
+  }
+  .overlay.visible{ display:flex; }
+  .modal{
+    background:#fff;
+    border-radius:14px;
+    max-width:380px;
+    width:100%;
+    padding:28px 24px 24px;
+    text-align:center;
+  }
+  .sello{
+    width:88px; height:88px;
+    border:4px solid var(--exito);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 16px;
+    transform:rotate(-8deg);
+    animation:sello-pop 0.35s cubic-bezier(.2,1.4,.4,1);
+  }
+  @keyframes sello-pop{
+    0%{ transform:rotate(-8deg) scale(0.4); opacity:0; }
+    100%{ transform:rotate(-8deg) scale(1); opacity:1; }
+  }
+  .sello svg{ width:44px; height:44px; }
+  .modal h2{ font-size:18px; margin:0 0 4px; color:var(--gris-isl-oscuro); }
+  .modal .remito-id{
+    font-size:22px; font-weight:800; letter-spacing:0.02em;
+    color:var(--rojo-isl); margin:6px 0 18px;
+  }
+  .modal a.ver-pdf{
+    display:block;
+    padding:13px;
+    background:var(--gris-isl-oscuro);
+    color:#fff;
+    text-decoration:none;
+    border-radius:8px;
+    font-weight:700;
+    font-size:14px;
+    margin-bottom:10px;
+  }
+  .modal button.nuevo{
+    display:block;
+    width:100%;
+    padding:12px;
+    background:none;
+    border:1.5px solid var(--borde);
+    border-radius:8px;
+    color:var(--texto-tenue);
+    font-weight:600;
+    font-size:13.5px;
+    cursor:pointer;
+  }
+
+  .loading-line{
+    font-size:12px; color:var(--texto-tenue); text-align:center; margin-top:8px;
+  }
+
+  .oculto{ display:none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="data:image/png;base64,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" alt="ISL">
+  <div>
+    <h1>Remitos Digitales</h1>
+    <div class="sub">Instrumental San Lorenzo</div>
+  </div>
+</header>
+
+<main>
+
+  <div class="tabs" id="tabsVista">
+    <button type="button" data-vista="nuevo" class="activo">Nuevo remito</button>
+    <button type="button" data-vista="listado">Remitos generados</button>
+  </div>
+
+  <div id="bannerError" class="banner error" style="display:none"></div>
+
+  <form id="formRemito">
+
+    <!-- 1. TIPO DE RECURSO -->
+    <div class="card">
+      <div class="eyebrow"><span class="num">01</span> Tipo de envío</div>
+      <div class="segmented" id="segmentedTipo">
+        <button type="button" data-tipo="Herramienta" class="activo">Herramienta</button>
+        <button type="button" data-tipo="EPP">EPP</button>
+        <button type="button" data-tipo="Extintor">Extintor</button>
+        <button type="button" data-tipo="Material">Material</button>
+        <button type="button" data-tipo="Stock">Stock (cables y materiales)</button>
+        <button type="button" data-tipo="HerramientaManual">Herram. manuales</button>
+        <button type="button" data-tipo="Izaje">Izaje</button>
+        <button type="button" data-tipo="Otros">Otros (texto libre)</button>
+      </div>
+    </div>
+
+    <!-- 2. ORIGEN / DESTINO -->
+    <div class="card">
+      <div class="eyebrow"><span class="num">02</span> Origen y destino</div>
+      <div class="field">
+        <label>Origen <span class="req">*</span></label>
+        <select id="obraOrigen" required><option value="" disabled selected>Cargando…</option></select>
+      </div>
+      <div class="field">
+        <label>Destino <span class="req">*</span></label>
+        <select id="obraDestino" required><option value="" disabled selected>Cargando…</option></select>
+      </div>
+    </div>
+
+    <!-- 2b. DATOS DEL CLIENTE (solo si el destino es externo, ej. ingreso a planta) -->
+    <div class="card oculto" id="cardCliente">
+      <div class="eyebrow"><span class="num">02b</span> Datos del cliente (ingreso a planta)</div>
+      <div class="field">
+        <label>Señor/es <span class="req">*</span></label>
+        <input type="text" id="cliente" placeholder="Razón social del cliente">
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Domicilio</label>
+          <input type="text" id="domicilio" placeholder="Ej: Ruta 10 y Ruta 11">
+        </div>
+        <div class="field">
+          <label>Localidad</label>
+          <input type="text" id="localidad" placeholder="Ej: San Lorenzo">
+        </div>
+      </div>
+      <div class="field">
+        <label>C.U.I.T. N° (opcional)</label>
+        <input type="text" id="cuit" placeholder="Opcional">
+      </div>
+    </div>
+
+    <!-- 3. ENTREGA / RECIBE -->
+    <div class="card">
+      <div class="eyebrow"><span class="num">03</span> Entrega y recepción</div>
+      <div class="field">
+        <label>Quién entrega <span class="req">*</span></label>
+        <select id="entregaSel" required></select>
+        <input type="text" id="entrega" placeholder="Nombre de quien despacha" class="oculto" style="margin-top:8px" required>
+      </div>
+      <div class="field">
+        <label>Destinatario <span class="req">*</span></label>
+        <select id="recibeId" required></select>
+      </div>
+    </div>
+
+    <!-- 4. ITEMS -->
+    <div class="card">
+      <div class="eyebrow"><span class="num">04</span> Ítems del remito</div>
+      <div id="listaItems"></div>
+      <button type="button" class="btn-agregar" id="btnAgregarItem">+ Agregar ítem</button>
+    </div>
+
+    <!-- 5. OBSERVACIONES (solo EPP) -->
+    <div class="card oculto" id="cardObservaciones">
+      <div class="eyebrow"><span class="num">05</span> Observaciones</div>
+      <div class="field">
+        <textarea id="observaciones" rows="2" placeholder="Opcional"></textarea>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-submit" id="btnSubmit">Generar remito</button>
+    <div class="loading-line oculto" id="loadingLine">Generando remito, no cierres esta pantalla…</div>
+
+  </form>
+
+  <!-- VISTA: listado de remitos generados (protegido con código) -->
+  <section id="vistaListado" class="oculto">
+    <div class="card oculto" id="cardCodigo">
+      <div class="eyebrow">Remitos generados</div>
+      <button type="button" class="btn-submit" id="btnIngresarListado">Cargar remitos</button>
+      <div class="msg-error oculto" id="errorListado"></div>
+    </div>
+    <div class="card oculto" id="cardListado">
+      <div class="eyebrow">Remitos generados</div>
+      <div class="lst-barra">
+        <input type="search" id="lstBuscar" placeholder="Buscar por número, destino, persona, ítem…">
+        <select id="lstEstado">
+          <option value="">Todos los estados</option>
+          <option value="camino">En camino</option>
+          <option value="recibido">Recibido</option>
+          <option value="rechazado">Recibo rechazado</option>
+        </select>
+        <select id="lstTipo"><option value="">Todos los tipos</option></select>
+      </div>
+      <div class="lst-resumen" id="lstResumen"></div>
+      <div id="listaRemitos"></div>
+      <button type="button" class="nuevo" id="btnActualizarListado" style="width:100%;margin-top:6px">Actualizar</button>
+    </div>
+  </section>
+
+  <div id="estadoApp" style="text-align:center;font-size:11px;color:var(--texto-tenue);margin:6px 0 0">
+    Versión 21-10-2026 · <span id="estadoCatalogo">iniciando…</span>
+    <button type="button" id="btnReintentarCatalogo" class="oculto" style="margin-left:6px;background:none;border:none;color:var(--rojo-isl);font-weight:700;font-size:11px;cursor:pointer;padding:0">Reintentar</button>
+  </div>
+
+</main>
+
+<!-- Overlay de éxito -->
+<div class="overlay" id="overlayExito">
+  <div class="modal">
+    <div class="sello">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+    <h2>Remito generado</h2>
+    <div class="remito-id" id="remitoIdTexto">REM-000000</div>
+    <a href="#" target="_blank" class="ver-pdf" id="linkVerPdf">Ver PDF del remito</a>
+    <p id="avisoMail" style="font-size:12.5px;margin:10px 0 0"></p>
+    <button type="button" class="nuevo" id="btnNuevoRemito">Cargar otro remito</button>
+  </div>
+</div>
+
+<script>
+  // ==== CONFIGURACIÓN — completar con la URL de tu Web App desplegada ====
+  const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwIfxEqwRuL7A_G6SpuqPmsX8NTK7n09kDWEL45n7r0Uy40gTKACsg2QeZlWgv7H75Gmw/exec";
+
+  // URL de la Web App del backend de STOCK (Apps Script del Sheet de stock)
+  const STOCK_URL = "PEGAR_URL_APP_STOCK";
+
+  const state = {
+    tipo: "Herramienta",
+    stkDisponibles: [],
+    stkSel: {},
+    stkBuscar: "",
+    stkCategoria: "",
+    stkDetalle: "",
+    cargandoStk: false,
+    nodos: [],
+    personal: [],
+    herramientasDisponibles: [],
+    cargandoHerramientas: false,
+    herramientasDetalle: "",
+    extintoresDisponibles: [],
+    extintoresDetalle: "",
+    cargandoExtintores: false,
+    materialesDisponibles: [],
+    cargandoMateriales: false,
+    comprasOcultos: 0,
+    comprasDestino: "",
+    manDisponibles: [],
+    manDetalle: "",
+    manSel: {},
+    manAbiertos: {},
+    manBuscar: "",
+    manCategoria: "",
+    cargandoMan: false,
+    izajeDisponibles: [],
+    izajeSel: {},
+    izajeDetalle: "",
+    izajeBloquear: true,
+    izajeTipoFiltro: "",
+    izajeBuscar: "",
+    cargandoIzaje: false,
+    codigoListado: "",
+    listado: [],
+    items: []
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  function nuevoItemVacio(){
+    return {
+      codigo: "", descripcion: "", cantidad: 1, unidad: "un",
+      extra: {}, herramientaId: null, extintorId: null, materialClave: null, materialPendiente: null, materialInfo: null, material_buscar: "",
+      modo: (state.tipo === "Herramienta" || state.tipo === "Extintor" || state.tipo === "Material") ? "lista" : "manual"
+    };
+  }
+
+  function renderItems(){
+    const cont = $("listaItems");
+    cont.innerHTML = "";
+    $("btnAgregarItem").style.display = (state.tipo === "Izaje" || state.tipo === "HerramientaManual" || state.tipo === "Stock") ? "none" : "";
+    if (state.tipo === "Stock") { renderStock_(cont); return; }
+    if (state.tipo === "Izaje") { renderIzaje_(cont); return; }
+    if (state.tipo === "HerramientaManual") { renderMan_(cont); return; }
+    state.items.forEach((item, idx) => {
+      const row = document.createElement("div");
+      row.className = "item-row";
+
+      if (state.tipo === "Herramienta" && item.modo === "lista") {
+        row.innerHTML = renderItemHerramientaLista_(item, idx);
+      } else if (state.tipo === "Herramienta") {
+        row.innerHTML = renderItemHerramientaManual_(item, idx);
+      } else if (state.tipo === "Extintor" && item.modo === "lista") {
+        row.innerHTML = renderItemExtintorLista_(item, idx);
+      } else if (state.tipo === "Extintor") {
+        row.innerHTML = renderItemExtintorManual_(item, idx);
+      } else if (state.tipo === "Material" && item.modo === "lista") {
+        row.innerHTML = renderItemMaterialLista_(item, idx);
+      } else if (state.tipo === "Material") {
+        row.innerHTML = renderItemMaterialManual_(item, idx);
+      } else if (state.tipo === "Otros") {
+        row.innerHTML = renderItemOtros_(item, idx);
+      } else {
+        row.innerHTML = renderItemGenerico_(item, idx);
+      }
+      cont.appendChild(row);
+    });
+
+    // Selects de herramienta (modo lista)
+    cont.querySelectorAll("select[data-campo='herramienta_id']").forEach(sel => {
+      sel.addEventListener("change", (e) => {
+        const idx = parseInt(e.target.dataset.idx, 10);
+        const h = state.herramientasDisponibles.find(x => String(x.id) === e.target.value);
+        if (h) {
+          state.items[idx].herramientaId = h.id;
+          state.items[idx].codigo = h.codigo;
+          state.items[idx].descripcion = h.descripcion;
+          state.items[idx].extra.Marca = h.marca || "";
+          state.items[idx].extra.Modelo = h.modelo || "";
+          state.items[idx].extra.NroSerie = h.nroSerie || "";
+        }
+        renderItems();
+      });
+    });
+
+    // Selects de extintor (modo lista)
+    cont.querySelectorAll("select[data-campo='extintor_id']").forEach(sel => {
+      sel.addEventListener("change", (e) => {
+        const idx = parseInt(e.target.dataset.idx, 10);
+        const ex = state.extintoresDisponibles.find(x => String(x.id) === e.target.value);
+        if (ex) {
+          state.items[idx].extintorId = ex.id;
+          state.items[idx].codigo = ex.codigo;
+          state.items[idx].descripcion = ex.tipo + " " + (ex.capacidad || "");
+          state.items[idx].extra.Marca = ex.marca || "";
+          state.items[idx].extra.Tipo = ex.tipo || "";
+          state.items[idx].extra.Capacidad = ex.capacidad || "";
+        }
+        renderItems();
+      });
+    });
+
+    // Material (modo lista): buscador + selección por clic + "Cambiar"
+    cont.querySelectorAll(".mat-buscar").forEach(inp => {
+      inp.addEventListener("input", (e) => {
+        const idx = parseInt(e.target.dataset.idx, 10);
+        state.items[idx].material_buscar = e.target.value;
+        const lista = document.getElementById("matlista-" + idx);
+        if (lista) lista.innerHTML = htmlListaMaterial_(idx, e.target.value);
+      });
+    });
+    cont.querySelectorAll(".mat-lista").forEach(lista => {
+      lista.addEventListener("click", (e) => {
+        const op = e.target.closest(".mat-op");
+        if (!op) return;
+        seleccionarMaterial_(parseInt(op.dataset.idx, 10), op.dataset.clave);
+      });
+    });
+    cont.querySelectorAll(".mat-cambiar").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const idx = parseInt(e.target.dataset.idx, 10);
+        const it = state.items[idx];
+        it.materialClave = null; it.materialPendiente = null; it.materialInfo = null;
+        it.codigo = ""; it.descripcion = ""; it.extra = {}; it.cantidad = 1; it.unidad = "un";
+        renderItems();
+      });
+    });
+
+    // Inputs de texto/número (cantidad, y todos los campos del modo manual)
+    cont.querySelectorAll("input").forEach(inp => {
+      inp.addEventListener("input", (e) => {
+        const idx = parseInt(e.target.dataset.idx, 10);
+        const campo = e.target.dataset.campo;
+        if (campo === "cantidad") {
+          let cant = parseInt(e.target.value, 10) || 1;
+          const pendiente = state.items[idx].materialPendiente;
+          if (pendiente != null && cant > pendiente) { cant = pendiente; e.target.value = cant; }
+          state.items[idx].cantidad = cant;
+        } else if (campo === "extra_marca") {
+          state.items[idx].extra.Marca = e.target.value;
+        } else if (campo === "extra_modelo") {
+          state.items[idx].extra.Modelo = e.target.value;
+        } else if (campo === "extra_nroserie") {
+          state.items[idx].extra.NroSerie = e.target.value;
+        } else if (campo === "extra_tipo") {
+          state.items[idx].extra.Tipo = e.target.value;
+        } else if (campo === "extra_capacidad") {
+          state.items[idx].extra.Capacidad = e.target.value;
+        } else {
+          state.items[idx][campo] = e.target.value;
+        }
+      });
+    });
+
+    // Toggle lista / manual
+    cont.querySelectorAll(".toggle-modo").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const idx = parseInt(e.target.dataset.idx, 10);
+        const item = state.items[idx];
+        item.modo = item.modo === "lista" ? "manual" : "lista";
+        item.herramientaId = null;
+        item.extintorId = null;
+        item.materialClave = null;
+        item.materialPendiente = null;
+        item.materialInfo = null;
+        item.codigo = ""; item.descripcion = ""; item.extra = {};
+        renderItems();
+      });
+    });
+
+    cont.querySelectorAll(".quitar").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const idx = parseInt(e.target.dataset.idx, 10);
+        state.items.splice(idx, 1);
+        renderItems();
+      });
+    });
+  }
+
+  function renderItemHerramientaLista_(item, idx){
+    const opciones = state.herramientasDisponibles.map(h =>
+      `<option value="${h.id}" ${item.herramientaId === h.id ? "selected" : ""}>${h.codigo} · ${h.descripcion}${h.marca ? " · " + h.marca : ""}${h.modelo ? " " + h.modelo : ""}${h.estado && h.estado.toLowerCase() !== "operativa" ? " [" + h.estado + "]" : ""}</option>`
+    ).join("");
+    const sinStock = state.herramientasDisponibles.length === 0;
+    const sinOrigen = !$("obraOrigen").value;
+    const mensajeVacio = sinOrigen
+      ? "Elegí primero el Origen (arriba) para ver las herramientas disponibles ahí."
+      : (state.cargandoHerramientas ? "Buscando herramientas…" : (state.herramientasDetalle || "No hay herramientas cargadas en ese origen."));
+    return `
+      <span class="item-num">Ítem ${idx + 1}</span>
+      ${state.items.length > 1 ? `<button type="button" class="quitar" data-idx="${idx}">×</button>` : ""}
+      <div class="field" style="margin-bottom:0">
+        <label style="font-size:11.5px">Herramienta (del inventario en el origen) <span class="req">*</span></label>
+        ${sinStock
+          ? `<div style="font-size:12.5px;color:var(--texto-tenue);padding:8px 0">${mensajeVacio}</div>`
+          : `<select data-idx="${idx}" data-campo="herramienta_id" required>
+               <option value="" disabled ${!item.herramientaId ? "selected" : ""}>Elegir herramienta…</option>
+               ${opciones}
+             </select>`}
+      </div>
+      ${item.herramientaId ? `
+      <div class="field" style="margin-top:8px;margin-bottom:0">
+        <label style="font-size:11.5px">Cantidad <span class="req">*</span></label>
+        <input type="number" min="1" data-idx="${idx}" data-campo="cantidad" value="${item.cantidad}" required style="max-width:120px">
+      </div>` : ""}
+      <button type="button" class="toggle-modo" data-idx="${idx}" style="margin-top:10px;background:none;border:none;color:var(--rojo-isl);font-size:12px;font-weight:600;padding:0;cursor:pointer">Cargar manualmente en su lugar</button>
+    `;
+  }
+
+  function renderItemHerramientaManual_(item, idx){
+    return `
+      <span class="item-num">Ítem ${idx + 1}</span>
+      ${state.items.length > 1 ? `<button type="button" class="quitar" data-idx="${idx}">×</button>` : ""}
+      <div class="field" style="margin-bottom:0">
+        <label style="font-size:11.5px">Descripción <span class="req">*</span></label>
+        <input type="text" data-idx="${idx}" data-campo="descripcion" value="${item.descripcion}" placeholder="Ej: Amoladora angular 7&quot;" required>
+      </div>
+      <div class="item-grid">
+        <div class="field" style="margin-bottom:0">
+          <label style="font-size:11.5px">Código</label>
+          <input type="text" data-idx="${idx}" data-campo="codigo" value="${item.codigo}" placeholder="Opcional">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label style="font-size:11.5px">Cantidad <span class="req">*</span></label>
+          <input type="number" min="1" data-idx="${idx}" data-campo="cantidad" value="${item.cantidad}" required>
+        </div>
+      </div>
+      <div class="item-grid3">
+        <div class="field" style="margin-bottom:0">
+          <label style="font-size:11.5px">Marca</label>
+          <input type="text" data-idx="${idx}" data-campo="extra_marca" value="${item.extra.Marca || ''}" placeholder="Opcional">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label style="font-size:11.5px">Modelo</label>
+          <input type="text" data-idx="${idx}" data-campo="extra_modelo" value="${item.extra.Modelo || ''}" placeholder="Opcional">
+        </div>
+      </div>
+      <div class="field" style="margin-top:8px">
+        <label style="font-size:11.5px">N° de serie (opcional)</label>
+        <input type="text" data-idx="${idx}" data-campo="extra_nroserie" value="${item.extra.NroSerie || ''}">
+      </div>
+      <button type="button" class="toggle-modo" data-idx="${idx}" style="margin-top:10px;background:none;border:none;color:var(--rojo-isl);font-size:12px;font-weight:600;padding:0;cursor:pointer">Elegir de la lista del inventario</button>
+    `;
+  }
+
+  function renderItemExtintorLista_(item, idx){
+    const opciones = state.extintoresDisponibles.map(ex =>
+      `<option value="${ex.id}" ${item.extintorId === ex.id ? "selected" : ""}>${ex.codigo} · ${ex.tipo}${ex.capacidad ? " " + ex.capacidad : ""}${ex.marca ? " · " + ex.marca : ""}</option>`
+    ).join("");
+    const sinStock = state.extintoresDisponibles.length === 0;
+    const sinOrigen = !$("obraOrigen").value;
+    const mensajeVacio = sinOrigen
+      ? "Elegí primero el Origen (arriba) para ver los extintores disponibles ahí."
+      : (state.cargandoExtintores ? "Buscando extintores…" : (state.extintoresDetalle || "No hay extintores operativos cargados en ese origen."));
+    return `
+      <span class="item-num">Ítem ${idx + 1}</span>
+      ${state.items.length > 1 ? `<button type="button" class="quitar" data-idx="${idx}">×</button>` : ""}
+      <div class="field" style="margin-bottom:0">
+        <label style="font-size:11.5px">Extintor (del inventario en el origen) <span class="req">*</span></label>
+        ${sinStock
+          ? `<div style="font-size:12.5px;color:var(--texto-tenue);padding:8px 0">${mensajeVacio}</div>`
+          : `<select data-idx="${idx}" data-campo="extintor_id" required>
+               <option value="" disabled ${!item.extintorId ? "selected" : ""}>Elegir extintor…</option>
+               ${opciones}
+             </select>`}
+      </div>
+      ${item.extintorId ? `
+      <div class="field" style="margin-top:8px;margin-bottom:0">
+        <label style="font-size:11.5px">Cantidad <span class="req">*</span></label>
+        <input type="number" min="1" data-idx="${idx}" data-campo="cantidad" value="${item.cantidad}" required style="max-width:120px">
+      </div>` : ""}
+      <button type="button" class="toggle-modo" data-idx="${idx}" style="margin-top:10px;background:none;border:none;color:var(--rojo-isl);font-size:12px;font-weight:600;padding:0;cursor:pointer">Cargar manualmente en su lugar</button>
+    `;
+  }
+
+  function renderItemExtintorManual_(item, idx){
+    return `
+      <span class="item-num">Ítem ${idx + 1}</span>
+      ${state.items.length > 1 ? `<button type="button" class="quitar" data-idx="${idx}">×</button>` : ""}
+      <div class="field" style="margin-bottom:0">
+        <label style="font-size:11.5px">Descripción <span class="req">*</span></label>
+        <input type="text" data-idx="${idx}" data-campo="descripcion" value="${item.descripcion}" placeholder="Ej: Matafuego PQS 5Kg" required>
+      </div>
+      <div class="item-grid">
+        <div class="field" style="margin-bottom:0">
+          <label style="font-size:11.5px">Código</label>
+          <input type="text" data-idx="${idx}" data-campo="codigo" value="${item.codigo}" placeholder="Opcional">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label style="font-size:11.5px">Cantidad <span class="req">*</span></label>
+          <input type="number" min="1" data-idx="${idx}" data-campo="cantidad" value="${item.cantidad}" required>
+        </div>
+      </div>
+      <div class="item-grid3">
+        <div class="field" style="margin-bottom:0">
+          <label style="font-size:11.5px">Marca</label>
+          <input type="text" data-idx="${idx}" data-campo="extra_marca" value="${item.extra.Marca || ''}" placeholder="Opcional">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label style="font-size:11.5px">Tipo (PQS/CO2/...)</label>
+          <input type="text" data-idx="${idx}" data-campo="extra_tipo" value="${item.extra.Tipo || ''}" placeholder="Opcional">
+        </div>
+      </div>
+      <div class="field" style="margin-top:8px">
+        <label style="font-size:11.5px">Capacidad (opcional)</label>
+        <input type="text" data-idx="${idx}" data-campo="extra_capacidad" value="${item.extra.Capacidad || ''}" placeholder="Ej: 5Kg">
+      </div>
+      <button type="button" class="toggle-modo" data-idx="${idx}" style="margin-top:10px;background:none;border:none;color:var(--rojo-isl);font-size:12px;font-weight:600;padding:0;cursor:pointer">Elegir de la lista del inventario</button>
+    `;
+  }
+
+  function escHtml(s){
+    return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+  function normalizarBusqueda_(s){
+    return String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  }
+  function claveMaterial_(c){ return c.tipo + "|" + c.id + "|" + c.nItem; }
+
+  // Lista agrupada por OC/PM, filtrada por lo que se escribió en el buscador.
+  function htmlListaMaterial_(idx, consulta){
+    const tokens = normalizarBusqueda_(consulta).split(/\s+/).filter(Boolean);
+    const visibles = state.materialesDisponibles.filter(c => {
+      const h = normalizarBusqueda_([c.tipo, c.numero, c.id, c.proveedor, c.descripcion, c.codigo, c.centroCosto].join(" "));
+      return tokens.every(t => h.indexOf(t) >= 0);
+    });
+    if (!visibles.length) return `<div class="mat-vacio">Ningún ítem coincide con la búsqueda.</div>`;
+    const grupos = {}, orden = [];
+    visibles.forEach(c => {
+      const k = c.tipo + "|" + c.numero;
+      if (!grupos[k]) { grupos[k] = { cab: c, items: [] }; orden.push(k); }
+      grupos[k].items.push(c);
+    });
+    return orden.map(k => {
+      const g = grupos[k], cab = g.cab;
+      return `<div class="mat-grupo">
+        <div class="mat-cab"><b>${escHtml(cab.tipo)} ${escHtml(cab.numero)}</b>${cab.proveedor ? " · " + escHtml(cab.proveedor) : ""}
+          <span class="mat-cc">Centro de costo: ${escHtml(cab.centroCosto)}</span></div>
+        ${g.items.map(c => `<button type="button" class="mat-op" data-idx="${idx}" data-clave="${escHtml(claveMaterial_(c))}">
+          <span class="mat-n">ítem ${escHtml(c.nItemVisible)}</span>${escHtml(c.descripcion)}
+          <span class="mat-pend">Pendiente: ${c.cantidadPendiente} ${escHtml(c.unidad || "")}</span></button>`).join("")}
+      </div>`;
+    }).join("");
+  }
+
+  function seleccionarMaterial_(idx, clave){
+    const c = state.materialesDisponibles.find(x => claveMaterial_(x) === clave);
+    if (!c) return;
+    const it = state.items[idx];
+    it.materialClave = clave;
+    it.materialInfo = c;
+    it.materialPendiente = c.cantidadPendiente;
+    it.codigo = c.codigo || "";
+    it.descripcion = c.descripcion;
+    it.unidad = c.unidad || "un";
+    it.cantidad = Math.min(it.cantidad || 1, c.cantidadPendiente);
+    it.extra = Object.assign({}, it.extra, {
+      compra_tipo: c.tipo, compra_id: c.id, compra_n_item: c.nItem,
+      compra_numero: c.numero, compra_proveedor: c.proveedor || "", compra_centro_costo: c.centroCosto || ""
+    });
+    renderItems();
+  }
+
+  function renderItemMaterialLista_(item, idx){
+    const cabecera = `<span class="item-num">Ítem ${idx + 1}</span>
+      ${state.items.length > 1 ? `<button type="button" class="quitar" data-idx="${idx}">×</button>` : ""}`;
+    const toggle = `<button type="button" class="toggle-modo" data-idx="${idx}" style="margin-top:10px;background:none;border:none;color:var(--rojo-isl);font-size:12px;font-weight:600;padding:0;cursor:pointer">Cargar como stock de Almacén (manual)</button>`;
+
+    if (item.materialClave && item.materialInfo) {
+      const c = item.materialInfo;
+      return `${cabecera}
+        <label style="font-size:11.5px">Material de OC/PM <span class="req">*</span></label>
+        <div class="mat-sel">
+          <div><b>${escHtml(c.tipo)} ${escHtml(c.numero)}</b>${c.proveedor ? " · " + escHtml(c.proveedor) : ""}<br>
+            ítem ${escHtml(c.nItemVisible)} · ${escHtml(c.descripcion)}<br>
+            <span style="color:var(--texto-tenue);font-size:11.5px">Centro de costo: ${escHtml(c.centroCosto)}</span></div>
+          <button type="button" class="mat-cambiar" data-idx="${idx}">Cambiar</button>
+        </div>
+        <div class="field" style="margin-top:8px;margin-bottom:0">
+          <label style="font-size:11.5px">Cantidad a enviar (máx. ${item.materialPendiente} ${escHtml(item.unidad || "")}) <span class="req">*</span></label>
+          <input type="number" min="1" max="${item.materialPendiente}" data-idx="${idx}" data-campo="cantidad" value="${item.cantidad}" required style="max-width:160px">
+        </div>
+        ${toggle}`;
+    }
+
+    let cuerpo;
+    if (!$("obraDestino").value) {
+      cuerpo = `<div class="mat-vacio" style="padding-left:0">Elegí primero el Destino (arriba) para ver los materiales asignados a esa obra.</div>`;
+    } else if (state.cargandoMateriales) {
+      cuerpo = `<div class="mat-vacio" style="padding-left:0">Buscando materiales pendientes…</div>`;
+    } else if (state.materialesDisponibles.length === 0) {
+      cuerpo = `<div class="mat-vacio" style="padding-left:0">No hay materiales de OC/PM pendientes asignados a «${escHtml(state.comprasDestino || "ese destino")}».</div>`;
+    } else {
+      cuerpo = `<input type="search" class="mat-buscar" data-idx="${idx}" data-campo="material_buscar" value="${escHtml(item.material_buscar || "")}" placeholder="Buscar por OC/PM, proveedor o descripción…" autocomplete="off">
+        <div class="mat-lista" id="matlista-${idx}">${htmlListaMaterial_(idx, item.material_buscar || "")}</div>`;
+    }
+    const nota = (state.comprasOcultos > 0 && $("obraDestino").value && !state.cargandoMateriales)
+      ? `<div class="mat-nota">${state.comprasOcultos} ítem(s) pendientes no se muestran porque su centro de costo está vacío o no coincide con ningún nodo.</div>` : "";
+    return `${cabecera}
+      <label style="font-size:11.5px">Material de OC/PM asignado al destino <span class="req">*</span></label>
+      ${cuerpo}${nota}${toggle}`;
+  }
+
+  function renderItemOtros_(item, idx){
+    return `
+      <span class="item-num">Ítem ${idx + 1}</span>
+      ${state.items.length > 1 ? `<button type="button" class="quitar" data-idx="${idx}">×</button>` : ""}
+      <div class="field" style="margin-bottom:0">
+        <label style="font-size:11.5px">Descripción (texto libre) <span class="req">*</span></label>
+        <input type="text" data-idx="${idx}" data-campo="descripcion" value="${escHtml(item.descripcion)}" placeholder="Ej: Cable de extensión 20 m" required>
+      </div>
+      <div class="item-grid3">
+        <div class="field" style="margin-bottom:0">
+          <label style="font-size:11.5px">Código</label>
+          <input type="text" data-idx="${idx}" data-campo="codigo" value="${escHtml(item.codigo)}" placeholder="Opcional">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label style="font-size:11.5px">Cantidad <span class="req">*</span></label>
+          <input type="number" min="1" data-idx="${idx}" data-campo="cantidad" value="${item.cantidad}" required>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label style="font-size:11.5px">Unidad</label>
+          <input type="text" data-idx="${idx}" data-campo="unidad" value="${escHtml(item.unidad)}" placeholder="un">
+        </div>
+      </div>
+    `;
+  }
+
+  function renderItemMaterialManual_(item, idx){
+    return `
+      <span class="item-num">Ítem ${idx + 1}</span>
+      ${state.items.length > 1 ? `<button type="button" class="quitar" data-idx="${idx}">×</button>` : ""}
+      <div class="field" style="margin-bottom:0">
+        <label style="font-size:11.5px">Descripción (stock de Almacén) <span class="req">*</span></label>
+        <input type="text" data-idx="${idx}" data-campo="descripcion" value="${item.descripcion}" placeholder="Ej: Tornillos varios" required>
+      </div>
+      <div class="item-grid">
+        <div class="field" style="margin-bottom:0">
+          <label style="font-size:11.5px">Código</label>
+          <input type="text" data-idx="${idx}" data-campo="codigo" value="${item.codigo}" placeholder="Opcional">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label style="font-size:11.5px">Cantidad <span class="req">*</span></label>
+          <input type="number" min="1" data-idx="${idx}" data-campo="cantidad" value="${item.cantidad}" required>
+        </div>
+      </div>
+      <button type="button" class="toggle-modo" data-idx="${idx}" style="margin-top:10px;background:none;border:none;color:var(--rojo-isl);font-size:12px;font-weight:600;padding:0;cursor:pointer">Elegir de una Orden de Compra / Pedido de Materiales</button>
+    `;
+  }
+
+  function renderItemGenerico_(item, idx){
+    return `
+      <span class="item-num">Ítem ${idx + 1}</span>
+      ${state.items.length > 1 ? `<button type="button" class="quitar" data-idx="${idx}">×</button>` : ""}
+      <div class="field" style="margin-bottom:0">
+        <label style="font-size:11.5px">Descripción <span class="req">*</span></label>
+        <input type="text" data-idx="${idx}" data-campo="descripcion" value="${item.descripcion}" placeholder="Ej: Arnés de seguridad" required>
+      </div>
+      <div class="item-grid">
+        <div class="field" style="margin-bottom:0">
+          <label style="font-size:11.5px">Código</label>
+          <input type="text" data-idx="${idx}" data-campo="codigo" value="${item.codigo}" placeholder="Opcional">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label style="font-size:11.5px">Cantidad <span class="req">*</span></label>
+          <input type="number" min="1" data-idx="${idx}" data-campo="cantidad" value="${item.cantidad}" required>
+        </div>
+      </div>
+    `;
+  }
+
+  $("btnAgregarItem").addEventListener("click", () => {
+    state.items.push(nuevoItemVacio());
+    renderItems();
+  });
+
+  $("segmentedTipo").addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-tipo]");
+    if (!btn) return;
+    state.tipo = btn.dataset.tipo;
+    document.querySelectorAll("#segmentedTipo button").forEach(b => b.classList.toggle("activo", b === btn));
+    $("cardObservaciones").classList.toggle("oculto", state.tipo !== "EPP");
+    // Reiniciamos los ítems al cambiar de tipo (los campos no son compatibles entre uno y otro)
+    state.items = [nuevoItemVacio()];
+    state.izajeSel = {}; state.izajeBuscar = ""; state.izajeTipoFiltro = "";
+    state.manSel = {}; state.manBuscar = ""; state.manCategoria = "";
+    state.stkSel = {}; state.stkBuscar = ""; state.stkCategoria = "";
+    cargarCatalogoItemsPorOrigen();
+  });
+
+  // "Quién entrega": lista del personal + opción de escribir otro nombre (el campo de texto sigue siendo la fuente del valor).
+  function poblarEntrega_(){
+    const sel = $("entregaSel");
+    sel.innerHTML = `<option value="" disabled selected>Elegir quién entrega…</option>` +
+      state.personal.map(p => `<option value="${escHtml(p.nombre)}">${escHtml(p.nombre)}</option>`).join("") +
+      `<option value="__otro__">Otra persona (escribir nombre)…</option>`;
+    $("entrega").value = "";
+    $("entrega").classList.add("oculto");
+  }
+  $("entregaSel").addEventListener("change", (e) => {
+    const inp = $("entrega");
+    if (e.target.value === "__otro__") { inp.value = ""; inp.classList.remove("oculto"); inp.focus(); }
+    else { inp.value = e.target.value; inp.classList.add("oculto"); }
+  });
+
+  function poblarSelect(select, opciones, placeholder){
+    select.innerHTML = `<option value="" disabled selected>${placeholder}</option>` +
+      opciones.map(o => `<option value="${o.id}">${o.nombre}</option>`).join("");
+  }
+
+  function estadoCatalogo_(txt, ok){
+    const el = $("estadoCatalogo");
+    el.textContent = txt;
+    el.style.color = ok ? "var(--exito)" : "var(--error)";
+    $("btnReintentarCatalogo").classList.toggle("oculto", !!ok);
+  }
+
+  async function cargarCatalogos(intento){
+    intento = intento || 1;
+    estadoCatalogo_(intento > 1 ? "reintentando (" + intento + ")…" : "cargando catálogos…", true);
+    $("estadoCatalogo").style.color = "var(--texto-tenue)";
+    try {
+      if (WEBAPP_URL.indexOf("PEGAR_") >= 0) {
+        mostrarError("Falta configurar la URL del servidor (WEBAPP_URL) en el archivo de la página.");
+        estadoCatalogo_("falta WEBAPP_URL", false);
+        return;
+      }
+      const res = await fetch(`${WEBAPP_URL}?accion=catalogo`);
+      if (!res.ok) throw new Error("El servidor respondió " + res.status);
+      const data = await res.json();
+      if (data.error) throw new Error(data.detalle || data.error);
+      state.nodos = data.nodos || [];
+      state.personal = data.personal || [];
+      poblarSelect($("obraOrigen"), state.nodos, "Elegir origen…");
+      poblarSelect($("obraDestino"), state.nodos, "Elegir destino…");
+      poblarSelect($("recibeId"), state.personal, "Elegir destinatario…");
+      poblarEntrega_();
+      if (!state.nodos.length) {
+        mostrarError("El catálogo de obras llegó vacío. Avisá al administrador (hoja NODOS).");
+        estadoCatalogo_("catálogo vacío", false);
+      } else {
+        estadoCatalogo_("catálogos OK (" + state.nodos.length + " obras, " + state.personal.length + " personas)", true);
+      }
+    } catch (err) {
+      if (intento < 3) { setTimeout(() => cargarCatalogos(intento + 1), 1500); return; }
+      estadoCatalogo_("error: " + err.message, false);
+      mostrarError("No se pudieron cargar los catálogos de obras/personal (" + err.message + "). Tocá «Reintentar» al pie de la página o recargá con Ctrl+Shift+R.");
+    }
+  }
+  $("btnReintentarCatalogo").addEventListener("click", () => { ocultarError(); cargarCatalogos(1); });
+
+  async function cargarHerramientasPorOrigen(){
+    const nodoId = $("obraOrigen").value;
+    state.herramientasDisponibles = [];
+    if (!nodoId || state.tipo !== "Herramienta") { renderItems(); return; }
+
+    state.cargandoHerramientas = true;
+    renderItems();
+    try {
+      const res = await fetch(`${WEBAPP_URL}?accion=herramientas_por_nodo&nodo=${encodeURIComponent(nodoId)}`);
+      const data = await res.json();
+      state.herramientasDisponibles = data.herramientas || [];
+      state.herramientasDetalle = data.detalle || "";
+    } catch (err) {
+      mostrarError("No se pudo cargar el listado de herramientas de ese origen.");
+    } finally {
+      state.cargandoHerramientas = false;
+      renderItems();
+    }
+  }
+
+  async function cargarExtintoresPorOrigen(){
+    const nodoId = $("obraOrigen").value;
+    state.extintoresDisponibles = [];
+    state.extintoresDetalle = "";
+    if (!nodoId || state.tipo !== "Extintor") { renderItems(); return; }
+
+    state.cargandoExtintores = true;
+    renderItems();
+    try {
+      const res = await fetch(`${WEBAPP_URL}?accion=extintores_por_nodo&nodo=${encodeURIComponent(nodoId)}`);
+      const data = await res.json();
+      state.extintoresDisponibles = data.extintores || [];
+      state.extintoresDetalle = data.detalle || "";
+    } catch (err) {
+      mostrarError("No se pudo cargar el listado de extintores de ese origen.");
+    } finally {
+      state.cargandoExtintores = false;
+      renderItems();
+    }
+  }
+
+  async function cargarComprasPendientes(){
+    // Depende del DESTINO: solo se ofrecen los ítems de OC/PM cuyo centro de
+    // costo coincide con el nodo de destino elegido.
+    const destinoId = $("obraDestino").value;
+    state.materialesDisponibles = [];
+    state.comprasOcultos = 0;
+    if (!destinoId || state.tipo !== "Material") { renderItems(); return; }
+
+    state.cargandoMateriales = true;
+    renderItems();
+    try {
+      const res = await fetch(`${WEBAPP_URL}?accion=compras_pendientes&nodo=${encodeURIComponent(destinoId)}`);
+      const data = await res.json();
+      if ($("obraDestino").value !== destinoId) return; // el usuario cambió de destino mientras cargaba
+      state.materialesDisponibles = data.compras || [];
+      state.comprasOcultos = data.ocultos || 0;
+      state.comprasDestino = data.destino || "";
+    } catch (err) {
+      mostrarError("No se pudo cargar el listado de OC/PM con saldo pendiente.");
+    } finally {
+      state.cargandoMateriales = false;
+      renderItems();
+    }
+  }
+
+
+
+  // ===== HERRAMIENTAS MANUALES: grupos por tipo con cantidad a enviar =====
+  function manClave_(h){ return [h.descripcion, h.categoria, h.marca, h.modelo].join("|"); }
+  function manGrupos_(){
+    const tokens = normalizarBusqueda_(state.manBuscar).split(/\s+/).filter(Boolean);
+    const g = {}, orden = [];
+    state.manDisponibles.forEach(h => {
+      if (state.manCategoria && h.categoria !== state.manCategoria) return;
+      const txt = normalizarBusqueda_([h.codigo, h.descripcion, h.categoria, h.marca, h.modelo].join(" "));
+      if (!tokens.every(t => txt.indexOf(t) >= 0)) return;
+      const k = manClave_(h);
+      if (!g[k]) { g[k] = { clave: k, h: h, items: [] }; orden.push(k); }
+      g[k].items.push(h);
+    });
+    return orden.map(k => g[k]).sort((a, b) => String(a.h.descripcion).localeCompare(String(b.h.descripcion)));
+  }
+  function manTotal_(){ return Object.keys(state.manSel).length; }
+  function manSelEnGrupo_(g){ return g.items.filter(i => state.manSel[i.id]).length; }
+  function manFilasHtml_(){
+    const grupos = manGrupos_();
+    if (!grupos.length) return `<div class="mat-vacio">Ninguna herramienta coincide.</div>`;
+    return grupos.map(g => {
+      const n = g.items.length, q = manSelEnGrupo_(g);
+      const detalle = [g.h.categoria, g.h.marca, g.h.modelo].filter(Boolean).join(" · ");
+      const abierto = !!state.manAbiertos[g.clave];
+      const codigos = abierto ? `<div class="man-tags">${g.items.slice().sort((a, b) => String(a.codigo).localeCompare(String(b.codigo))).map(i => {
+        const raro = i.estado && i.estado.toLowerCase() !== "operativa";
+        return `<label class="man-tag${state.manSel[i.id] ? " sel" : ""}"><input type="checkbox" data-mancod="${escHtml(i.id)}" data-grupo="${escHtml(g.clave)}" ${state.manSel[i.id] ? "checked" : ""}>${escHtml(i.codigo)}${raro ? ` <small>[${escHtml(i.estado)}]</small>` : ""}</label>`;
+      }).join("")}</div>` : "";
+      return `<div class="man-grupo">
+        <div class="izj-fila" style="border-bottom:none">
+          <span class="izj-txt"><b>${escHtml(g.h.descripcion)}</b><small>${escHtml(detalle)}</small></span>
+          <span class="chip tipo">${n} disp.</span>
+          <input type="number" min="0" max="${n}" value="${q || ""}" placeholder="0" data-man="${escHtml(g.clave)}" style="width:64px;flex:none" title="Cantidad: elige los primeros códigos">
+          <button type="button" class="man-btn" data-mantog="${escHtml(g.clave)}">${abierto ? "Cerrar" : "Elegir TAG"}</button>
+        </div>${codigos}
+      </div>`;
+    }).join("");
+  }
+  function renderMan_(cont){
+    const box = document.createElement("div");
+    box.className = "izj-box";
+    if (!$("obraOrigen").value) {
+      box.innerHTML = `<div class="mat-vacio">Elegí primero el origen para ver sus herramientas manuales.</div>`;
+    } else if (state.cargandoMan) {
+      box.innerHTML = `<div class="mat-vacio">Buscando herramientas manuales…</div>`;
+    } else if (!state.manDisponibles.length) {
+      box.innerHTML = `<div class="mat-vacio">${escHtml(state.manDetalle || "No hay herramientas manuales en ese origen.")}</div>`;
+    } else {
+      const cats = Array.from(new Set(state.manDisponibles.map(h => h.categoria).filter(Boolean))).sort();
+      box.innerHTML = `
+        <div class="izj-aviso">Tocá <b>Elegir TAG</b> para marcar los códigos exactos que enviás, o escribí una cantidad para tomar los primeros disponibles.</div>
+        <div class="izj-barra">
+          <input type="search" id="manBuscar" placeholder="Buscar (ej: llave 17, MAN-APR-012…)" value="${escHtml(state.manBuscar)}">
+          <select id="manCat"><option value="">Todas las categorías</option>${cats.map(t => `<option value="${escHtml(t)}" ${t === state.manCategoria ? "selected" : ""}>${escHtml(t)}</option>`).join("")}</select>
+        </div>
+        <div class="izj-acciones"><button type="button" id="manLimpiar">Limpiar</button><span id="manCuenta">${manTotal_()} herramienta(s) a enviar</span></div>
+        <div class="izj-lista" id="manLista">${manFilasHtml_()}</div>`;
+    }
+    cont.appendChild(box);
+    if (!box.querySelector("#manLista")) return;
+    const refrescar = () => { $("manLista").innerHTML = manFilasHtml_(); $("manCuenta").textContent = manTotal_() + " herramienta(s) a enviar"; };
+    const grupoPorClave = (k) => manGrupos_().find(g => g.clave === k);
+    $("manBuscar").addEventListener("input", e => { state.manBuscar = e.target.value; refrescar(); });
+    $("manCat").addEventListener("change", e => { state.manCategoria = e.target.value; refrescar(); });
+    $("manLimpiar").addEventListener("click", () => { state.manSel = {}; refrescar(); });
+    $("manLista").addEventListener("click", e => {
+      const k = e.target.dataset && e.target.dataset.mantog;
+      if (k == null) return;
+      state.manAbiertos[k] = !state.manAbiertos[k];
+      refrescar();
+    });
+    $("manLista").addEventListener("change", e => {
+      const id = e.target.dataset && e.target.dataset.mancod;
+      if (id == null) return;
+      if (e.target.checked) state.manSel[id] = true; else delete state.manSel[id];
+      refrescar();
+      const foco = $("manLista").querySelector(`input[data-mancod="${CSS.escape(id)}"]`); if (foco) foco.focus();
+    });
+    $("manLista").addEventListener("input", e => {
+      const k = e.target.dataset && e.target.dataset.man;
+      if (k == null) return;
+      const g = grupoPorClave(k); if (!g) return;
+      const max = g.items.length;
+      let q = parseInt(e.target.value, 10); if (isNaN(q) || q < 0) q = 0; if (q > max) { q = max; e.target.value = q; }
+      const ordenados = g.items.slice().sort((a, b) => String(a.codigo).localeCompare(String(b.codigo)));
+      let actual = ordenados.filter(i => state.manSel[i.id]);
+      if (q > actual.length) { ordenados.filter(i => !state.manSel[i.id]).slice(0, q - actual.length).forEach(i => state.manSel[i.id] = true); }
+      else { actual.slice(q).forEach(i => delete state.manSel[i.id]); }
+      $("manCuenta").textContent = manTotal_() + " herramienta(s) a enviar";
+    });
+    $("manLista").addEventListener("focusout", e => {
+      if (e.target.dataset && e.target.dataset.man != null && !state.manAbiertos[e.target.dataset.man]) { /* mantiene el valor */ }
+    });
+  }
+  function itemsMan_(){
+    return state.manDisponibles.filter(h => state.manSel[h.id])
+      .sort((a, b) => String(a.codigo).localeCompare(String(b.codigo)))
+      .map(h => ({
+        tipo_recurso: "HerramientaManual", codigo: h.codigo, descripcion: h.descripcion, cantidad: 1, unidad: "un",
+        extra: Object.assign({ herramienta_id: h.id }, h.marca ? { Marca: h.marca } : {}, h.modelo ? { Modelo: h.modelo } : {})
+      }));
+  }
+  async function cargarManuales(){
+    const origen = $("obraOrigen").value;
+    if (state.tipo !== "HerramientaManual") return;
+    state.manDisponibles = []; state.manDetalle = "";
+    if (!origen) { renderItems(); return; }
+    state.cargandoMan = true; renderItems();
+    try {
+      const res = await fetch(`${WEBAPP_URL}?accion=herramientas_manuales_por_nodo&nodo=${encodeURIComponent(origen)}`);
+      const data = await res.json();
+      if ($("obraOrigen").value !== origen) return;
+      state.manDisponibles = data.herramientas || [];
+      state.manDetalle = data.detalle || "";
+      const ids = new Set(state.manDisponibles.map(h => h.id));
+      Object.keys(state.manSel).forEach(id => { if (!ids.has(id)) delete state.manSel[id]; });
+    } catch (err) {
+      mostrarError("No se pudo cargar el listado de herramientas manuales.");
+    } finally {
+      state.cargandoMan = false; renderItems();
+    }
+  }
+
+  // ===== STOCK (cables y materiales de almacén): selección múltiple con saldo del origen =====
+  function stkFiltrados_(){
+    const tokens = normalizarBusqueda_(state.stkBuscar).split(/\s+/).filter(Boolean);
+    return state.stkDisponibles.filter(i => {
+      if (state.stkCategoria && i.categoria !== state.stkCategoria) return false;
+      const txt = normalizarBusqueda_([i.codigo, i.descripcion, i.categoria, i.subtipo].join(" "));
+      return tokens.every(t => txt.indexOf(t) >= 0);
+    }).sort((a, b) => String(a.descripcion).localeCompare(String(b.descripcion), "es", { numeric: true }));
+  }
+  function stkTotal_(){ return Object.keys(state.stkSel).filter(k => state.stkSel[k] > 0).length; }
+  function stkFilasHtml_(){
+    const lista = stkFiltrados_();
+    if (!lista.length) return `<div class="mat-vacio">Ningún ítem coincide.</div>`;
+    const fmtN = (n) => Number(n).toLocaleString("es-AR", { maximumFractionDigits: 3 });
+    return lista.map(i => {
+      const detalle = [i.categoria, i.subtipo, i.codigo].filter(Boolean).join(" · ");
+      const v = state.stkSel[i.codigo];
+      return `<div class="izj-fila">
+        <span class="izj-txt"><b>${escHtml(i.descripcion)}</b><small>${escHtml(detalle)}</small></span>
+        <span class="chip tipo">${fmtN(i.saldo)} ${escHtml(i.unidad)} disp.</span>
+        <input type="number" min="0" max="${i.saldo}" step="any" value="${v ? v : ""}" placeholder="0" data-stk="${escHtml(i.codigo)}" style="width:92px;flex:none" title="Cantidad a enviar en ${escHtml(i.unidad)}">
+        <span style="font-size:12px;color:var(--texto-tenue);width:26px">${escHtml(i.unidad)}</span>
+      </div>`;
+    }).join("");
+  }
+  function renderStock_(cont){
+    const box = document.createElement("div");
+    box.className = "izj-box";
+    if (!$("obraOrigen").value) {
+      box.innerHTML = `<div class="mat-vacio">Elegí primero el origen para ver el stock disponible ahí.</div>`;
+    } else if (state.cargandoStk) {
+      box.innerHTML = `<div class="mat-vacio">Buscando stock…</div>`;
+    } else if (!state.stkDisponibles.length) {
+      box.innerHTML = `<div class="mat-vacio">${escHtml(state.stkDetalle || "No hay stock cargado en ese origen.")}</div>`;
+    } else {
+      const cats = Array.from(new Set(state.stkDisponibles.map(i => i.categoria).filter(Boolean))).sort();
+      box.innerHTML = `
+        <div class="izj-aviso">Escribí la cantidad a enviar de cada ítem (máximo: lo que hay en el origen). Los cables van en metros.</div>
+        <div class="izj-barra">
+          <input type="search" id="stkBuscar" placeholder="Buscar (ej: 4x16, comando, CAB-012…)" value="${escHtml(state.stkBuscar)}">
+          <select id="stkCat"><option value="">Todas las categorías</option>${cats.map(t => `<option value="${escHtml(t)}" ${t === state.stkCategoria ? "selected" : ""}>${escHtml(t)}</option>`).join("")}</select>
+        </div>
+        <div class="izj-acciones"><button type="button" id="stkLimpiar">Limpiar</button><span id="stkCuenta">${stkTotal_()} ítem(s) a enviar</span></div>
+        <div class="izj-lista" id="stkLista">${stkFilasHtml_()}</div>`;
+    }
+    cont.appendChild(box);
+    if (!box.querySelector("#stkLista")) return;
+    const refrescar = () => { $("stkLista").innerHTML = stkFilasHtml_(); $("stkCuenta").textContent = stkTotal_() + " ítem(s) a enviar"; };
+    $("stkBuscar").addEventListener("input", e => { state.stkBuscar = e.target.value; refrescar(); });
+    $("stkCat").addEventListener("change", e => { state.stkCategoria = e.target.value; refrescar(); });
+    $("stkLimpiar").addEventListener("click", () => { state.stkSel = {}; refrescar(); });
+    $("stkLista").addEventListener("input", e => {
+      const cod = e.target.dataset && e.target.dataset.stk;
+      if (cod == null) return;
+      const it = state.stkDisponibles.find(x => x.codigo === cod); if (!it) return;
+      let q = parseFloat(String(e.target.value).replace(",", "."));
+      if (isNaN(q) || q <= 0) { delete state.stkSel[cod]; }
+      else {
+        if (q > it.saldo) { q = it.saldo; e.target.value = q; }
+        state.stkSel[cod] = q;
+      }
+      $("stkCuenta").textContent = stkTotal_() + " ítem(s) a enviar";
+    });
+  }
+  function itemsStock_(){
+    // Se envía como tipo "Material" (lo procesa el servidor de remitos tal cual) y se marca extra.stock
+    // para que el backend de Stock lo registre como movimiento.
+    return state.stkDisponibles.filter(i => state.stkSel[i.codigo] > 0)
+      .map(i => ({
+        tipo_recurso: "Material", codigo: i.codigo, descripcion: i.descripcion,
+        cantidad: state.stkSel[i.codigo], unidad: i.unidad, extra: { stock: true }
+      }));
+  }
+  async function cargarStock_(){
+    const origen = $("obraOrigen").value;
+    if (state.tipo !== "Stock") return;
+    state.stkDisponibles = []; state.stkDetalle = "";
+    if (!origen) { renderItems(); return; }
+    if (STOCK_URL.indexOf("PEGAR_") >= 0) { mostrarError("Falta configurar STOCK_URL en el archivo de la página."); return; }
+    state.cargandoStk = true; renderItems();
+    try {
+      const res = await fetch(`${STOCK_URL}?accion=stock_por_nodo&nodo=${encodeURIComponent(origen)}`);
+      const data = await res.json();
+      if ($("obraOrigen").value !== origen) return;
+      if (data.error) throw new Error(data.detalle || data.error);
+      state.stkDisponibles = data.items || [];
+      state.stkDetalle = data.detalle || "";
+      const cods = new Set(state.stkDisponibles.map(i => i.codigo));
+      Object.keys(state.stkSel).forEach(c => { if (!cods.has(c)) delete state.stkSel[c]; });
+    } catch (err) {
+      mostrarError("No se pudo cargar el stock de ese origen (" + err.message + ").");
+    } finally {
+      state.cargandoStk = false; renderItems();
+    }
+  }
+
+  // ===== ELEMENTOS DE IZAJE: selección múltiple de los que hay en el origen =====
+  function izajeVisibles_(){
+    const tokens = normalizarBusqueda_(state.izajeBuscar).split(/\s+/).filter(Boolean);
+    return state.izajeDisponibles.filter(e => {
+      if (state.izajeTipoFiltro && e.tipo !== state.izajeTipoFiltro) return false;
+      const h = normalizarBusqueda_([e.id, e.tipo, e.descripcion, e.capacidad, e.marca, e.modelo].join(" "));
+      return tokens.every(t => h.indexOf(t) >= 0);
+    });
+  }
+  function izajeBloqueado_(e){ return e.estado === "vencido" && state.izajeBloquear; }
+  function izajeChip_(e){
+    if (e.estado === "vencido") return `<span class="chip err">VENCIDA ${escHtml(e.vencimiento)}</span>`;
+    if (e.estado === "por_vencer") return `<span class="chip warn">Vence en ${e.dias} día(s)</span>`;
+    if (e.estado === "sin_dato") return `<span class="chip tipo">Sin certificación cargada</span>`;
+    return `<span class="chip ok">Vigente hasta ${escHtml(e.vencimiento)}</span>`;
+  }
+  function izajeFilasHtml_(){
+    const vis = izajeVisibles_();
+    if (!vis.length) return `<div class="mat-vacio">Ningún elemento coincide.</div>`;
+    return vis.map(e => {
+      const bloq = izajeBloqueado_(e);
+      const sel = !!state.izajeSel[e.id];
+      return `<label class="izj-fila${bloq ? " izj-bloq" : ""}">
+        <input type="checkbox" data-izj="${escHtml(e.id)}" ${sel ? "checked" : ""} ${bloq ? "disabled" : ""}>
+        <span class="izj-txt"><b>${escHtml(e.id)}</b> · ${escHtml(e.tipo)} ${escHtml(e.descripcion)}
+          <small>${escHtml([e.capacidad, e.marca, e.modelo].filter(Boolean).join(" · "))}</small></span>
+        ${izajeChip_(e)}
+      </label>`;
+    }).join("");
+  }
+  function izajeResumen_(){
+    const n = Object.keys(state.izajeSel).length;
+    return n ? `${n} elemento(s) seleccionado(s)` : "Ninguno seleccionado";
+  }
+  function renderIzaje_(cont){
+    const box = document.createElement("div");
+    box.className = "izj-box";
+    if (!$("obraOrigen").value) {
+      box.innerHTML = `<div class="mat-vacio">Elegí primero el origen para ver sus elementos de izaje.</div>`;
+    } else if (state.cargandoIzaje) {
+      box.innerHTML = `<div class="mat-vacio">Buscando elementos de izaje…</div>`;
+    } else if (!state.izajeDisponibles.length) {
+      box.innerHTML = `<div class="mat-vacio">${escHtml(state.izajeDetalle || "No hay elementos de izaje en ese origen.")}</div>`;
+    } else {
+      const tipos = Array.from(new Set(state.izajeDisponibles.map(e => e.tipo))).sort();
+      const aviso = state.izajeBloquear
+        ? `Los elementos con certificación vencida no se pueden enviar a obra (solo volver al Almacén).`
+        : `Destino Almacén: se permiten elementos con certificación vencida.`;
+      box.innerHTML = `
+        <div class="izj-aviso">${aviso}</div>
+        <div class="izj-barra">
+          <input type="search" id="izjBuscar" placeholder="Buscar por código, tipo, marca…" value="${escHtml(state.izajeBuscar)}">
+          <select id="izjTipo"><option value="">Todos los tipos</option>${tipos.map(t => `<option value="${escHtml(t)}" ${t === state.izajeTipoFiltro ? "selected" : ""}>${escHtml(t)}</option>`).join("")}</select>
+        </div>
+        <div class="izj-acciones"><button type="button" id="izjMarcar">Marcar visibles</button><button type="button" id="izjLimpiar">Limpiar</button><span id="izjCuenta">${izajeResumen_()}</span></div>
+        <div class="izj-lista" id="izjLista">${izajeFilasHtml_()}</div>`;
+    }
+    cont.appendChild(box);
+    if (!box.querySelector("#izjLista")) return;
+    const refrescar = () => { $("izjLista").innerHTML = izajeFilasHtml_(); $("izjCuenta").textContent = izajeResumen_(); };
+    $("izjBuscar").addEventListener("input", e => { state.izajeBuscar = e.target.value; refrescar(); });
+    $("izjTipo").addEventListener("change", e => { state.izajeTipoFiltro = e.target.value; refrescar(); });
+    $("izjMarcar").addEventListener("click", () => { izajeVisibles_().forEach(e => { if (!izajeBloqueado_(e)) state.izajeSel[e.id] = true; }); refrescar(); });
+    $("izjLimpiar").addEventListener("click", () => { state.izajeSel = {}; refrescar(); });
+    $("izjLista").addEventListener("change", e => {
+      const id = e.target.dataset.izj;
+      if (!id) return;
+      if (e.target.checked) state.izajeSel[id] = true; else delete state.izajeSel[id];
+      $("izjCuenta").textContent = izajeResumen_();
+    });
+  }
+  function itemsIzaje_(){
+    return state.izajeDisponibles.filter(e => state.izajeSel[e.id]).map(e => ({
+      tipo_recurso: "Izaje", codigo: e.id,
+      descripcion: (e.tipo + " " + e.descripcion).trim(),
+      cantidad: 1, unidad: "un",
+      extra: { izaje_id: e.id, Marca: e.marca, Modelo: e.modelo, Capacidad: e.capacidad, Tipo: e.tipo }
+    }));
+  }
+  async function cargarIzaje(){
+    const origen = $("obraOrigen").value, destino = $("obraDestino").value;
+    if (state.tipo !== "Izaje") return;
+    state.izajeDisponibles = []; state.izajeDetalle = "";
+    if (!origen) { renderItems(); return; }
+    state.cargandoIzaje = true; renderItems();
+    try {
+      const res = await fetch(`${WEBAPP_URL}?accion=elementos_izaje_por_nodo&nodo=${encodeURIComponent(origen)}&destino=${encodeURIComponent(destino || "")}`);
+      const data = await res.json();
+      if ($("obraOrigen").value !== origen || $("obraDestino").value !== (destino || "")) return;
+      state.izajeDisponibles = data.elementos || [];
+      state.izajeBloquear = data.bloquearVencidos !== false;
+      state.izajeDetalle = data.detalle || "";
+      // Se descartan selecciones que ya no son válidas (otro origen o vencido hacia obra)
+      Object.keys(state.izajeSel).forEach(id => {
+        const e = state.izajeDisponibles.find(x => x.id === id);
+        if (!e || izajeBloqueado_(e)) delete state.izajeSel[id];
+      });
+    } catch (err) {
+      mostrarError("No se pudo cargar el listado de elementos de izaje.");
+    } finally {
+      state.cargandoIzaje = false; renderItems();
+    }
+  }
+
+  function cargarCatalogoItemsPorOrigen(){
+    if (state.tipo === "Herramienta") cargarHerramientasPorOrigen();
+    else if (state.tipo === "Extintor") cargarExtintoresPorOrigen();
+    else if (state.tipo === "Material") cargarComprasPendientes();
+    else if (state.tipo === "Izaje") cargarIzaje();
+    else if (state.tipo === "HerramientaManual") cargarManuales();
+    else if (state.tipo === "Stock") cargarStock_();
+    else renderItems();
+  }
+
+  $("obraOrigen").addEventListener("change", cargarCatalogoItemsPorOrigen);
+
+  $("obraDestino").addEventListener("change", () => {
+    const nodoId = $("obraDestino").value;
+    const nodo = state.nodos.find(n => String(n.id) === nodoId);
+    const esExterno = nodo && String(nodo.tipo || "").indexOf("Externo") === 0;
+    $("cardCliente").classList.toggle("oculto", !esExterno);
+    $("cliente").required = esExterno;
+    if (esExterno && !$("cliente").value) {
+      $("cliente").value = nodo.nombre; // prellenado, editable
+    }
+    if (state.tipo === "Izaje") cargarIzaje();
+    if (state.tipo === "Material") {
+      // Los ítems elegidos de OC/PM ya no corresponden al nuevo destino: se limpian.
+      state.items = state.items.map(it => (it.modo === "lista" ? nuevoItemVacio() : it));
+      cargarComprasPendientes();
+    }
+  });
+
+  function mostrarError(msg){
+    const b = $("bannerError");
+    b.textContent = msg;
+    b.style.display = "block";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function ocultarError(){
+    $("bannerError").style.display = "none";
+  }
+
+  $("formRemito").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    ocultarError();
+
+    if (state.tipo === "HerramientaManual" && itemsMan_().length === 0) {
+      mostrarError("Indicá la cantidad de al menos una herramienta manual para enviar.");
+      return;
+    }
+    if (state.tipo === "Stock" && itemsStock_().length === 0) {
+      mostrarError("Escribí la cantidad de al menos un ítem de stock para enviar.");
+      return;
+    }
+    if (state.tipo === "Izaje" && itemsIzaje_().length === 0) {
+      mostrarError("Marcá al menos un elemento de izaje para enviar.");
+      return;
+    }
+    const itemsInvalidos = state.tipo !== "Izaje" && state.tipo !== "HerramientaManual" && state.tipo !== "Stock" && state.items.some(i => {
+      if (state.tipo === "Herramienta" && i.modo === "lista") return !i.herramientaId || !i.cantidad;
+      if (state.tipo === "Extintor" && i.modo === "lista") return !i.extintorId || !i.cantidad;
+      if (state.tipo === "Material" && i.modo === "lista") return !i.materialClave || !i.cantidad;
+      return !i.descripcion || !i.cantidad;
+    });
+    if (state.tipo !== "Izaje" && state.tipo !== "HerramientaManual" && state.tipo !== "Stock" && (state.items.length === 0 || itemsInvalidos)) {
+      mostrarError("Completá todos los ítems: elegí de la lista (o cargá manual) y la cantidad.");
+      return;
+    }
+
+    const cardClienteVisible = !$("cardCliente").classList.contains("oculto");
+    if (cardClienteVisible && !$("cliente").value.trim()) {
+      mostrarError("Completá el campo Señor/es (destino externo, ingreso a planta).");
+      return;
+    }
+
+    const payload = {
+      obra_origen: $("obraOrigen").value,
+      obra_destino: $("obraDestino").value,
+      entrega: $("entrega").value.trim(),
+      recibe_id: $("recibeId").value,
+      observaciones: $("observaciones").value.trim(),
+      cliente: cardClienteVisible ? $("cliente").value.trim() : "",
+      domicilio: cardClienteVisible ? $("domicilio").value.trim() : "",
+      localidad: cardClienteVisible ? $("localidad").value.trim() : "",
+      cuit: cardClienteVisible ? $("cuit").value.trim() : "",
+      items: state.tipo === "Stock" ? itemsStock_() : state.tipo === "Izaje" ? itemsIzaje_() : (state.tipo === "HerramientaManual" ? itemsMan_() : state.items.map(i => {
+        const extra = Object.assign({}, i.extra);
+        if (i.herramientaId) extra.herramienta_id = i.herramientaId;
+        if (i.extintorId) extra.extintor_id = i.extintorId;
+        return {
+          tipo_recurso: state.tipo,
+          codigo: i.codigo,
+          descripcion: i.descripcion,
+          cantidad: i.cantidad,
+          unidad: i.unidad,
+          extra: extra
+        };
+      }))
+    };
+
+    $("btnSubmit").disabled = true;
+    $("loadingLine").classList.remove("oculto");
+
+    try {
+      const url = `${WEBAPP_URL}?payload=${encodeURIComponent(JSON.stringify(payload))}`;
+      if (url.length > 7500) {
+        const porItem = Math.ceil(url.length / Math.max(1, payload.items.length));
+        const maxItems = Math.max(1, Math.floor(6500 / porItem));
+        mostrarError(`Son demasiados ítems para un solo remito (${payload.items.length}). Dividilo en remitos de hasta ${maxItems} ítems.`);
+        $("btnSubmit").disabled = false;
+        $("loadingLine").classList.add("oculto");
+        return;
+      }
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.error) {
+        mostrarError(data.detalle || data.error);
+        $("btnSubmit").disabled = false;
+        $("loadingLine").classList.add("oculto");
+        return;
+      }
+
+      $("remitoIdTexto").textContent = data.remito_id;
+      if (state.tipo === "Stock" && STOCK_URL.indexOf("PEGAR_") < 0) { fetch(`${STOCK_URL}?accion=sincronizar`).catch(() => {}); }
+      $("linkVerPdf").href = data.pdf_url;
+      const av = $("avisoMail");
+      if (data.mail_enviado === true) { av.textContent = "✔ Se avisó por mail a quien recibe."; av.style.color = "var(--exito)"; }
+      else if (data.mail_enviado === false) { av.textContent = "⚠ No se pudo enviar el mail a quien recibe (¿tiene email cargado?). Avisale que confirme escaneando el QR del PDF."; av.style.color = "var(--error)"; }
+      else { av.textContent = ""; }
+      $("overlayExito").classList.add("visible");
+    } catch (err) {
+      mostrarError("No se pudo generar el remito. Revisá tu conexión e intentá de nuevo.");
+    } finally {
+      $("btnSubmit").disabled = false;
+      $("loadingLine").classList.add("oculto");
+    }
+  });
+
+  $("btnNuevoRemito").addEventListener("click", () => {
+    $("overlayExito").classList.remove("visible");
+    $("formRemito").reset();
+    poblarEntrega_();
+    state.herramientasDisponibles = [];
+    state.extintoresDisponibles = [];
+    state.materialesDisponibles = [];
+    state.izajeDisponibles = []; state.izajeSel = {}; state.izajeBuscar = ""; state.izajeTipoFiltro = "";
+    state.manDisponibles = []; state.manSel = {}; state.manBuscar = ""; state.manCategoria = "";
+    state.stkDisponibles = []; state.stkSel = {}; state.stkBuscar = ""; state.stkCategoria = "";
+    state.items = [nuevoItemVacio()];
+    if (state.tipo === "Izaje") cargarIzaje(); else if (state.tipo === "HerramientaManual") cargarManuales(); else if (state.tipo === "Stock") cargarStock_(); else renderItems();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  // ---------- Pestañas: Nuevo remito / Remitos generados ----------
+  $("tabsVista").addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-vista]");
+    if (!btn) return;
+    const vista = btn.dataset.vista;
+    document.querySelectorAll("#tabsVista button").forEach(b => b.classList.toggle("activo", b === btn));
+    $("formRemito").classList.toggle("oculto", vista !== "nuevo");
+    $("vistaListado").classList.toggle("oculto", vista !== "listado");
+    ocultarError();
+    if (vista === "listado") cargarListado();
+  });
+
+  // ---------- Listado de remitos (protegido con código) ----------
+  function estadoVisible_(e){
+    const s = String(e || "");
+    if (s === "Confirmado") return { txt: "Recibido", cls: "ok", grupo: "recibido" };
+    if (s.indexOf("Rechazado") === 0) return { txt: "Recibo rechazado (mail no coincide)", cls: "err", grupo: "rechazado" };
+    return { txt: "En camino", cls: "warn", grupo: "camino" };
+  }
+
+  function mostrarErrorListado_(msg){
+    const el = $("errorListado");
+    el.textContent = msg;
+    el.classList.toggle("oculto", !msg);
+  }
+
+  async function cargarListado(){
+    mostrarErrorListado_("");
+    $("btnIngresarListado").disabled = true;
+    $("btnActualizarListado").disabled = true;
+    try {
+      const url = `${WEBAPP_URL}?accion=listado`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.error) {
+        $("cardCodigo").classList.remove("oculto");
+        $("cardListado").classList.add("oculto");
+        mostrarErrorListado_(data.detalle || data.error);
+        return;
+      }
+      state.listado = data.remitos || [];
+      const tipos = Array.from(new Set(state.listado.map(r => r.tipo).filter(Boolean))).sort();
+      const sel = $("lstTipo"), actual = sel.value;
+      sel.innerHTML = '<option value="">Todos los tipos</option>' + tipos.map(t => `<option value="${escHtml(t)}">${escHtml(t)}</option>`).join("");
+      sel.value = tipos.indexOf(actual) >= 0 ? actual : "";
+      $("cardCodigo").classList.add("oculto");
+      $("cardListado").classList.remove("oculto");
+      renderListado();
+    } catch (err) {
+      mostrarErrorListado_("No se pudo cargar el listado. Revisá tu conexión e intentá de nuevo.");
+    } finally {
+      $("btnIngresarListado").disabled = false;
+      $("btnActualizarListado").disabled = false;
+    }
+  }
+
+  function renderListado(){
+    const q = normalizarBusqueda_($("lstBuscar").value).split(/\s+/).filter(Boolean);
+    const fEstado = $("lstEstado").value, fTipo = $("lstTipo").value;
+    const filas = state.listado.filter(r => {
+      if (fEstado && estadoVisible_(r.estado).grupo !== fEstado) return false;
+      if (fTipo && r.tipo !== fTipo) return false;
+      const h = normalizarBusqueda_([r.remito_id, r.fecha, r.origen, r.destino, r.entrega, r.recibe, r.tipo, r.resumen].join(" "));
+      return q.every(t => h.indexOf(t) >= 0);
+    });
+    const enCamino = state.listado.filter(r => estadoVisible_(r.estado).grupo === "camino").length;
+    $("lstResumen").textContent = `${filas.length} de ${state.listado.length} remitos · ${enCamino} en camino`;
+    $("listaRemitos").innerHTML = filas.length ? filas.map(r => {
+      const est = estadoVisible_(r.estado);
+      return `<div class="rem-card">
+        <div class="rem-top"><b>${escHtml(r.remito_id)}</b>
+          <span class="chip tipo">${escHtml(r.tipo)}</span>
+          <span class="chip ${est.cls}">${escHtml(est.txt)}</span></div>
+        <div class="rem-fecha">${escHtml(r.fecha)}${est.grupo === "recibido" && r.fecha_recepcion ? " · recibido " + escHtml(r.fecha_recepcion) : ""}</div>
+        <div class="rem-ruta">${escHtml(r.origen)} → ${escHtml(r.destino)}</div>
+        <div class="rem-pers">Envía: ${escHtml(r.entrega)} · Recibe: ${escHtml(r.recibe)}</div>
+        ${r.resumen ? `<div class="rem-res">${escHtml(r.cant_items)} ítem(s): ${escHtml(r.resumen)}</div>` : ""}
+        ${r.pdf_url ? `<a class="rem-pdf" href="${escHtml(r.pdf_url)}" target="_blank" rel="noopener">Ver PDF</a>` : ""}
+      </div>`;
+    }).join("") : `<div class="mat-vacio" style="padding-left:0">No hay remitos que coincidan.</div>`;
+  }
+
+  $("btnIngresarListado").addEventListener("click", () => {
+    cargarListado();
+  });
+  $("btnActualizarListado").addEventListener("click", cargarListado);
+  $("lstBuscar").addEventListener("input", renderListado);
+  $("lstEstado").addEventListener("change", renderListado);
+  $("lstTipo").addEventListener("change", renderListado);
+
+  // Init
+  state.items = [nuevoItemVacio()];
+  renderItems();
+  cargarCatalogos();
+</script>
+
+</body>
+</html>

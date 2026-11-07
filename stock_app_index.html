@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISL · Stock de Almacenes</title>
+<style>
+  :root{
+    --gris-isl:#4a4e54; --gris-isl-oscuro:#2b2d31; --rojo-isl:#c81f3f; --rojo-isl-oscuro:#9e1832;
+    --fondo:#f2f1ee; --superficie:#fff; --borde:#dcdad4; --texto:#2b2d31; --texto-tenue:#75797f;
+    --exito:#2e7d32; --exito-fondo:#eaf4ea; --error:#b3261e; --error-fondo:#fbeceb; --aviso-fondo:#fff4d6;
+    --radio:10px; --sombra:0 1px 2px rgba(43,45,49,.06),0 1px 8px rgba(43,45,49,.05);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--texto);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:60px}
+  header{background:var(--gris-isl-oscuro);padding:18px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  header h1{color:#fff;font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin:0}
+  header .sub{color:#b8bcc2;font-size:11px;letter-spacing:.04em;margin-top:2px}
+  header .grow{flex:1}
+  .btn{background:var(--rojo-isl);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer}
+  .btn:hover{background:var(--rojo-isl-oscuro)} .btn:disabled{opacity:.55;cursor:default}
+  .btn.sec{background:#fff;color:var(--gris-isl);border:1px solid var(--borde)} .btn.sec:hover{background:#f6f5f2}
+  .btn.mini{padding:5px 9px;font-size:12px}
+  main{max-width:1180px;margin:0 auto;padding:14px}
+  .tabs{display:flex;gap:6px;margin:6px 0 14px;flex-wrap:wrap}
+  .tabs button{background:#fff;border:1px solid var(--borde);border-radius:999px;padding:8px 15px;font-size:13px;font-weight:600;color:var(--gris-isl);cursor:pointer}
+  .tabs button.activo{background:var(--rojo-isl);border-color:var(--rojo-isl);color:#fff}
+  .card{background:var(--superficie);border-radius:var(--radio);box-shadow:var(--sombra);padding:16px;margin-bottom:14px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+  input,select,textarea{font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--borde);border-radius:8px;background:#fff;color:var(--texto)}
+  input[type=search]{flex:1;min-width:200px}
+  textarea{width:100%;min-height:60px}
+  label{font-size:12px;color:var(--texto-tenue);display:block;margin-bottom:3px;font-weight:600}
+  .field{margin-bottom:12px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px} @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .tabla-wrap{overflow:auto;max-height:68vh;border:1px solid var(--borde);border-radius:8px}
+  table{border-collapse:collapse;width:100%;font-size:13px;background:#fff}
+  th{position:sticky;top:0;background:var(--gris-isl);color:#fff;text-align:left;padding:8px 10px;font-size:12px;white-space:nowrap;z-index:1}
+  td{padding:7px 10px;border-top:1px solid #ecebe6;white-space:nowrap}
+  td.desc{white-space:normal;min-width:200px}
+  td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+  tbody tr.clic{cursor:pointer} tbody tr.clic:hover{background:#fbeceb}
+  .neg{color:var(--error);font-weight:700} .cero{color:#b4b7bb}
+  .chip{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;background:#eceae5;color:var(--gris-isl);font-weight:600}
+  .chip.warn{background:var(--aviso-fondo);color:#8a6100}
+  .msg{padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:12px;display:none}
+  .msg.ok{display:block;background:var(--exito-fondo);color:var(--exito)}
+  .msg.err{display:block;background:var(--error-fondo);color:var(--error)}
+  .vacio{padding:24px;text-align:center;color:var(--texto-tenue);font-size:13px}
+  .item-fila{display:grid;grid-template-columns:1fr 110px 40px 36px;gap:8px;align-items:center;margin-bottom:8px}
+  .item-fila .u{font-size:12px;color:var(--texto-tenue)}
+  .modo{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+  .modo label{display:flex;align-items:center;gap:6px;border:1px solid var(--borde);border-radius:8px;padding:8px 12px;cursor:pointer;margin:0;font-size:13px;color:var(--texto)}
+  .modo input{margin:0}
+  .modal{position:fixed;inset:0;background:rgba(43,45,49,.55);display:none;align-items:flex-start;justify-content:center;padding:30px 12px;overflow:auto;z-index:20}
+  .modal.visible{display:flex}
+  .modal .caja{background:#fff;border-radius:12px;max-width:900px;width:100%;padding:16px}
+  .modal h3{margin:0 0 4px;font-size:16px} .modal .sub{color:var(--texto-tenue);font-size:12px;margin-bottom:10px}
+  .pos{color:var(--exito);font-weight:700}
+  .nota{font-size:12px;color:var(--texto-tenue);margin-top:8px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>ISL · Stock de Almacenes</h1><div class="sub">Cables y materiales · movimientos desde Remitos Digitales</div></div>
+  <div class="grow"></div>
+  <span id="estadoSync" class="sub"></span>
+  <button class="btn sec" id="btnSync" type="button">Sincronizar remitos</button>
+</header>
+<main>
+  <div class="tabs" id="tabs">
+    <button data-vista="stock" class="activo">Stock</button>
+    <button data-vista="movs">Movimientos</button>
+    <button data-vista="ingreso">Ingreso / Ajuste</button>
+    <button data-vista="catalogo">Catálogo</button>
+  </div>
+  <div id="banner" class="msg"></div>
+
+  <!-- STOCK -->
+  <section id="v-stock">
+    <div class="card">
+      <div class="toolbar">
+        <input type="search" id="stBuscar" placeholder="Buscar código o descripción (ej: 4x16, comando, CAB-012)">
+        <select id="stCat"><option value="">Todas las categorías</option></select>
+        <label style="display:flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="stSin"> Ocultar sin stock</label>
+        <label style="display:flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="stVer"> Solo a verificar / negativos</label>
+      </div>
+      <div class="tabla-wrap"><table id="tablaStock"><thead></thead><tbody></tbody></table></div>
+      <div class="nota" id="stNota"></div>
+    </div>
+  </section>
+
+  <!-- MOVIMIENTOS -->
+  <section id="v-movs" style="display:none">
+    <div class="card">
+      <div class="toolbar">
+        <input type="search" id="mvBuscar" placeholder="Buscar por ítem, remito, persona, obra…">
+        <select id="mvNodo"><option value="">Todos los nodos</option></select>
+        <button class="btn sec" id="mvIr" type="button">Buscar</button>
+      </div>
+      <div class="tabla-wrap"><table id="tablaMovs"><thead></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- INGRESO / AJUSTE -->
+  <section id="v-ingreso" style="display:none">
+    <div class="card">
+      <div class="modo" id="modoIng">
+        <label><input type="radio" name="modo" value="compra" checked> Ingreso por compra</label>
+        <label><input type="radio" name="modo" value="ajuste_mas"> Ajuste de inventario (+)</label>
+        <label><input type="radio" name="modo" value="ajuste_menos"> Ajuste de inventario (−)</label>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Almacén *</label><select id="ingAlm" style="width:100%"></select></div>
+        <div class="field"><label id="lblDoc">Nº de remito/factura del proveedor</label><input id="ingDoc" style="width:100%" placeholder="Ej: R-0001-00012345"></div>
+        <div class="field"><label>Responsable</label><input id="ingResp" style="width:100%" placeholder="Quién carga"></div>
+        <div class="field"><label id="lblObs">Observaciones</label><input id="ingObs" style="width:100%"></div>
+      </div>
+      <label>Ítems *</label>
+      <div id="ingItems"></div>
+      <datalist id="dlItems"></datalist>
+      <button class="btn sec mini" id="ingAdd" type="button">+ Agregar ítem</button>
+      <div style="margin-top:14px"><button class="btn" id="ingGuardar" type="button">Registrar</button></div>
+      <div class="nota">Los envíos a obra y las transferencias entre almacenes se hacen con un remito digital (tipo «Stock»); aparecen acá solos.</div>
+    </div>
+  </section>
+
+  <!-- CATALOGO -->
+  <section id="v-catalogo" style="display:none">
+    <div class="card">
+      <b>Nuevo ítem</b>
+      <div class="grid2" style="margin-top:10px">
+        <div class="field"><label>Descripción *</label><input id="caDesc" style="width:100%" placeholder="Ej: 3x2,5 mm² Prysmian"></div>
+        <div class="field"><label>Categoría *</label><select id="caCat" style="width:100%"></select></div>
+        <div class="field"><label>Subtipo</label><input id="caSub" style="width:100%" placeholder="Ej: Potencia, Comando…"></div>
+        <div class="field"><label>Unidad *</label><select id="caUni" style="width:100%"><option>m</option><option selected>un</option><option>kg</option><option>l</option><option>caja</option><option>rollo</option></select></div>
+      </div>
+      <button class="btn" id="caGuardar" type="button">Dar de alta</button>
+      <div class="nota">El código se asigna solo (CAB-064, ELE-001, …). Después cargá su stock inicial en «Ingreso / Ajuste».</div>
+    </div>
+    <div class="card">
+      <div class="toolbar"><input type="search" id="caBuscar" placeholder="Buscar en el catálogo…"></div>
+      <div class="tabla-wrap"><table id="tablaCat"><thead><tr><th>Código</th><th>Descripción</th><th>Categoría</th><th>Subtipo</th><th>Unidad</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="modal"><div class="caja">
+  <div style="display:flex;justify-content:space-between;gap:8px"><div><h3 id="mTitulo"></h3><div class="sub" id="mSub"></div></div><button class="btn sec mini" id="mCerrar" type="button">Cerrar</button></div>
+  <div class="tabla-wrap"><table id="tablaKardex"><thead></thead><tbody></tbody></table></div>
+</div></div>
+
+<script>
+  // ==== CONFIGURACIÓN ====
+  const API = "PEGAR_URL_APP_STOCK";
+
+  const S = { cat: [], alm: [], obras: [], categorias: [], stock: null, cargado: false };
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const fmt = n => (n == null || n === "") ? "" : Number(n).toLocaleString("es-AR", { maximumFractionDigits: 2 });
+  const norm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+
+  function banner(msg, tipo){ const b = $("banner"); b.textContent = msg || ""; b.className = "msg" + (msg ? (tipo === "ok" ? " ok" : " err") : ""); if (msg) window.scrollTo({ top: 0, behavior: "smooth" }); }
+  function pinGet(){ try { return sessionStorage.getItem("isl_stock_pin") || ""; } catch (e) { return ""; } }
+  function pinSet(v){ try { sessionStorage.setItem("isl_stock_pin", v); } catch (e) {} }
+
+  async function get(accion, params){
+    if (API.indexOf("PEGAR_") >= 0) throw new Error("Falta configurar la URL del servidor (API) en index.html.");
+    const u = new URL(API); u.searchParams.set("accion", accion);
+    Object.entries(params || {}).forEach(([k, v]) => { if (v != null && v !== "") u.searchParams.set(k, v); });
+    const r = await fetch(u.toString()); const d = await r.json();
+    if (d.error) throw new Error(d.detalle || d.error);
+    return d;
+  }
+  async function post(accion, body){
+    if (API.indexOf("PEGAR_") >= 0) throw new Error("Falta configurar la URL del servidor (API) en index.html.");
+    let pin = pinGet();
+    if (!pin) { pin = prompt("PIN para registrar movimientos:") || ""; if (!pin) throw new Error("Operación cancelada: falta el PIN."); }
+    const r = await fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(Object.assign({ accion: accion, pin: pin }, body)) });
+    const d = await r.json();
+    if (d.error) { if (/PIN/.test(d.detalle || "")) pinSet(""); throw new Error(d.detalle || d.error); }
+    pinSet(pin); return d;
+  }
+
+  // ---------- pestañas ----------
+  $("tabs").addEventListener("click", e => {
+    const b = e.target.closest("button[data-vista]"); if (!b) return;
+    document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("activo", x === b));
+    ["stock", "movs", "ingreso", "catalogo"].forEach(v => $("v-" + v).style.display = (v === b.dataset.vista) ? "" : "none");
+    banner("");
+    if (b.dataset.vista === "movs") cargarMovs();
+  });
+
+  // ---------- carga inicial ----------
+  async function cargarTodo(){
+    try {
+      const [c, st] = await Promise.all([get("catalogo"), get("stock")]);
+      S.cat = c.items; S.alm = c.almacenes; S.obras = c.obras; S.categorias = c.categorias; S.stock = st; S.cargado = true;
+      poblarSelects(); renderStock(); renderCatalogo(); renderItemsIngreso();
+      $("estadoSync").textContent = "Actualizado " + new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+    } catch (err) { banner(err.message, "err"); }
+  }
+  function poblarSelects(){
+    const cats = Array.from(new Set(S.cat.map(i => i.categoria).filter(Boolean))).sort();
+    $("stCat").innerHTML = '<option value="">Todas las categorías</option>' + cats.map(c => `<option>${esc(c)}</option>`).join("");
+    $("caCat").innerHTML = S.categorias.map(c => `<option>${esc(c)}</option>`).join("");
+    $("ingAlm").innerHTML = S.alm.map(a => `<option value="${esc(a.id)}">${esc(a.nombre)}</option>`).join("");
+    const nodos = S.alm.map(a => ({ id: a.id, nombre: a.nombre })).concat(S.obras.filter(o => !S.alm.some(a => a.id === o.id)));
+    $("mvNodo").innerHTML = '<option value="">Todos los nodos</option>' + nodos.map(n => `<option value="${esc(n.id)}">${esc(n.nombre)}</option>`).join("");
+    $("dlItems").innerHTML = S.cat.map(i => `<option value="${esc(i.codigo + " · " + i.descripcion)}"></option>`).join("");
+  }
+
+  // ---------- STOCK ----------
+  function renderStock(){
+    if (!S.stock) return;
+    const q = norm($("stBuscar").value).split(/\s+/).filter(Boolean), cat = $("stCat").value, sin = $("stSin").checked, ver = $("stVer").checked;
+    const alm = S.stock.almacenes;
+    $("tablaStock").querySelector("thead").innerHTML = "<tr><th>Código</th><th>Descripción</th><th>Categoría</th><th>Unid.</th>" +
+      alm.map(a => `<th class="n">${esc(a.nombre)}</th>`).join("") + '<th class="n">Total almacenes</th><th class="n">En obras</th><th></th></tr>';
+    const filas = S.stock.filas.filter(f => {
+      if (cat && f.categoria !== cat) return false;
+      if (sin && f.total <= 0 && f.enObras <= 0) return false;
+      const neg = alm.some(a => f.saldos[a.id] < 0) || f.enObras < 0;
+      if (ver && !(f.verificar > 0 || neg)) return false;
+      const txt = norm([f.codigo, f.descripcion, f.categoria, f.subtipo].join(" "));
+      return q.every(t => txt.indexOf(t) >= 0);
+    });
+    const celda = v => `<td class="n ${v < 0 ? "neg" : (v === 0 ? "cero" : "")}">${v === 0 ? "–" : fmt(v)}</td>`;
+    $("tablaStock").querySelector("tbody").innerHTML = filas.length ? filas.map(f => `<tr class="clic" data-cod="${esc(f.codigo)}">
+        <td>${esc(f.codigo)}</td><td class="desc"><b>${esc(f.descripcion)}</b>${f.subtipo ? ` <span class="chip">${esc(f.subtipo)}</span>` : ""}</td>
+        <td>${esc(f.categoria)}</td><td>${esc(f.unidad)}</td>
+        ${alm.map(a => celda(f.saldos[a.id])).join("")}${celda(f.total)}${celda(f.enObras)}
+        <td>${f.verificar > 0 ? `<span class="chip warn" title="Renglones a verificar">verificar ${f.verificar}</span>` : ""}</td></tr>`).join("")
+      : `<tr><td colspan="${alm.length + 7}" class="vacio">Nada para mostrar con esos filtros.</td></tr>`;
+    $("stNota").textContent = filas.length + " de " + S.stock.filas.length + " ítems · tocá una fila para ver su historial. Unidades distintas no se suman.";
+  }
+  ["stBuscar", "stCat", "stSin", "stVer"].forEach(id => $(id).addEventListener("input", renderStock));
+  $("tablaStock").addEventListener("click", e => { const tr = e.target.closest("tr[data-cod]"); if (tr) abrirKardex(tr.dataset.cod); });
+
+  function filasMov(m){
+    return `<tr${m.verificar ? ' style="background:var(--aviso-fondo)"' : ""}><td>${esc(m.fecha)} ${esc(m.hora)}</td><td>${esc(m.tipo)}</td>
+      <td class="desc"><b>${esc(m.codigo)}</b> ${esc(m.descripcion)}</td><td>${esc(m.origenNombre)}</td><td>${esc(m.destinoNombre)}</td>
+      <td class="n">${fmt(m.cantidad)} ${esc(m.unidad)}</td><td>${esc(m.doc)}</td><td>${esc(m.resp)}${m.recep ? " → " + esc(m.recep) : ""}</td>
+      <td class="desc">${esc(m.obs)}</td></tr>`;
+  }
+  const CABMOV = "<tr><th>Fecha</th><th>Tipo</th><th>Ítem</th><th>Origen</th><th>Destino</th><th class=\"n\">Cantidad</th><th>Documento</th><th>Entrega → Recibe</th><th>Observaciones</th></tr>";
+
+  async function abrirKardex(cod){
+    const f = S.cat.find(i => i.codigo === cod) || { descripcion: "", unidad: "" };
+    $("mTitulo").textContent = cod + " · " + f.descripcion; $("mSub").textContent = "Historial de movimientos (más recientes primero)";
+    $("tablaKardex").querySelector("thead").innerHTML = CABMOV;
+    $("tablaKardex").querySelector("tbody").innerHTML = '<tr><td colspan="9" class="vacio">Cargando…</td></tr>';
+    $("modal").classList.add("visible");
+    try {
+      const d = await get("kardex", { item: cod });
+      $("tablaKardex").querySelector("tbody").innerHTML = d.movimientos.length ? d.movimientos.map(filasMov).join("") : '<tr><td colspan="9" class="vacio">Sin movimientos.</td></tr>';
+    } catch (err) { $("tablaKardex").querySelector("tbody").innerHTML = `<tr><td colspan="9" class="vacio">${esc(err.message)}</td></tr>`; }
+  }
+  $("mCerrar").addEventListener("click", () => $("modal").classList.remove("visible"));
+  $("modal").addEventListener("click", e => { if (e.target === $("modal")) $("modal").classList.remove("visible"); });
+
+  // ---------- MOVIMIENTOS ----------
+  async function cargarMovs(){
+    $("tablaMovs").querySelector("thead").innerHTML = CABMOV;
+    $("tablaMovs").querySelector("tbody").innerHTML = '<tr><td colspan="9" class="vacio">Cargando…</td></tr>';
+    try {
+      const d = await get("movimientos", { q: $("mvBuscar").value, nodo: $("mvNodo").value, limit: 200 });
+      $("tablaMovs").querySelector("tbody").innerHTML = d.movimientos.length ? d.movimientos.map(filasMov).join("") : '<tr><td colspan="9" class="vacio">Sin resultados.</td></tr>';
+    } catch (err) { banner(err.message, "err"); }
+  }
+  $("mvIr").addEventListener("click", cargarMovs);
+  $("mvBuscar").addEventListener("keydown", e => { if (e.key === "Enter") cargarMovs(); });
+  $("mvNodo").addEventListener("change", cargarMovs);
+
+  // ---------- INGRESO / AJUSTE ----------
+  let ingItems = [{ texto: "", cantidad: "" }];
+  function modoActual(){ return document.querySelector('input[name="modo"]:checked').value; }
+  function codDeTexto(t){ const m = String(t).split(" · ")[0].trim(); const i = S.cat.find(x => x.codigo === m); return i ? i.codigo : ""; }
+  function renderItemsIngreso(){
+    $("ingItems").innerHTML = ingItems.map((it, i) => {
+      const c = S.cat.find(x => x.codigo === codDeTexto(it.texto));
+      return `<div class="item-fila"><input list="dlItems" data-i="${i}" data-k="texto" value="${esc(it.texto)}" placeholder="Buscar ítem (código o descripción)">
+        <input type="number" min="0" step="any" data-i="${i}" data-k="cantidad" value="${esc(it.cantidad)}" placeholder="Cantidad"><span class="u">${c ? esc(c.unidad) : ""}</span>
+        <button class="btn sec mini" type="button" data-q="${i}">×</button></div>`;
+    }).join("");
+    const m = modoActual();
+    $("lblDoc").textContent = m === "compra" ? "Nº de remito/factura del proveedor" : "Referencia (opcional)";
+    $("lblObs").textContent = m === "compra" ? "Observaciones" : "Motivo del ajuste *";
+  }
+  $("ingItems").addEventListener("input", e => {
+    const i = e.target.dataset.i; if (i == null) return;
+    ingItems[i][e.target.dataset.k] = e.target.value;
+    if (e.target.dataset.k === "texto") { const u = e.target.parentNode.querySelector(".u"); const c = S.cat.find(x => x.codigo === codDeTexto(e.target.value)); u.textContent = c ? c.unidad : ""; }
+  });
+  $("ingItems").addEventListener("click", e => { const q = e.target.dataset.q; if (q == null) return; ingItems.splice(q, 1); if (!ingItems.length) ingItems.push({ texto: "", cantidad: "" }); renderItemsIngreso(); });
+  $("ingAdd").addEventListener("click", () => { ingItems.push({ texto: "", cantidad: "" }); renderItemsIngreso(); });
+  $("modoIng").addEventListener("change", renderItemsIngreso);
+  $("ingGuardar").addEventListener("click", async () => {
+    banner("");
+    const items = ingItems.map(i => ({ codigo: codDeTexto(i.texto), cantidad: parseFloat(String(i.cantidad).replace(",", ".")) })).filter(i => i.codigo && i.cantidad > 0);
+    if (!items.length) { banner("Elegí al menos un ítem del catálogo y una cantidad mayor a 0.", "err"); return; }
+    if (ingItems.some(i => i.texto && !codDeTexto(i.texto))) { banner("Hay un ítem que no está en el catálogo. Elegilo de la lista o dalo de alta en «Catálogo».", "err"); return; }
+    const btn = $("ingGuardar"); btn.disabled = true;
+    try {
+      const d = await post("ingreso", { modo: modoActual(), almacen: $("ingAlm").value, nrodoc: $("ingDoc").value, responsable: $("ingResp").value, obs: $("ingObs").value, items: items });
+      banner("Registrado (" + d.registrados + " ítem/s) · documento " + d.doc, "ok");
+      ingItems = [{ texto: "", cantidad: "" }]; $("ingDoc").value = ""; $("ingObs").value = ""; renderItemsIngreso();
+      await cargarTodo();
+    } catch (err) { banner(err.message, "err"); } finally { btn.disabled = false; }
+  });
+
+  // ---------- CATALOGO ----------
+  function renderCatalogo(){
+    const q = norm($("caBuscar").value).split(/\s+/).filter(Boolean);
+    const filas = S.cat.filter(i => { const t = norm([i.codigo, i.descripcion, i.categoria, i.subtipo].join(" ")); return q.every(x => t.indexOf(x) >= 0); });
+    $("tablaCat").querySelector("tbody").innerHTML = filas.map(i => `<tr><td>${esc(i.codigo)}</td><td class="desc">${esc(i.descripcion)}</td><td>${esc(i.categoria)}</td><td>${esc(i.subtipo)}</td><td>${esc(i.unidad)}</td></tr>`).join("")
+      || '<tr><td colspan="5" class="vacio">Sin resultados.</td></tr>';
+  }
+  $("caBuscar").addEventListener("input", renderCatalogo);
+  $("caGuardar").addEventListener("click", async () => {
+    banner("");
+    if (!$("caDesc").value.trim()) { banner("Falta la descripción.", "err"); return; }
+    const btn = $("caGuardar"); btn.disabled = true;
+    try {
+      const d = await post("alta_item", { descripcion: $("caDesc").value, categoria: $("caCat").value, subtipo: $("caSub").value, unidad: $("caUni").value });
+      banner("Ítem creado: " + d.item.codigo + " · " + d.item.descripcion, "ok");
+      $("caDesc").value = ""; $("caSub").value = "";
+      await cargarTodo();
+    } catch (err) { banner(err.message, "err"); } finally { btn.disabled = false; }
+  });
+
+  // ---------- sincronizar ----------
+  $("btnSync").addEventListener("click", async () => {
+    const b = $("btnSync"); b.disabled = true; b.textContent = "Sincronizando…"; banner("");
+    try {
+      const d = await get("sincronizar");
+      banner(d.movimientos ? ("Se registraron " + d.movimientos + " movimiento(s) de " + d.remitos.length + " remito(s): " + d.remitos.join(", ")) : "No hay remitos de Stock nuevos.", "ok");
+      if (d.alertas && d.alertas.length) banner("Atención: " + d.alertas.join(" · "), "err");
+      await cargarTodo();
+    } catch (err) { banner(err.message, "err"); } finally { b.disabled = false; b.textContent = "Sincronizar remitos"; }
+  });
+
+  renderItemsIngreso();
+  cargarTodo();
+</script>
+</body>
+</html>
